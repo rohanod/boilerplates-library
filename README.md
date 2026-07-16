@@ -1,5 +1,3 @@
-![Welcome](./.assets/library-banner.jpg)
-
 Personal **Boilerplates** template library for homelab and self-hosted infrastructure.
 
 Original collection: [ChristianLempa/boilerplates-library](https://github.com/ChristianLempa/boilerplates-library)
@@ -8,8 +6,8 @@ Original collection: [ChristianLempa/boilerplates-library](https://github.com/Ch
 
 | Kind | Template | Version | Description |
 | --- | --- | --- | --- |
-| `compose` | `changedetection` | `0.55.8` | Website change detection and notifications |
-| `compose` | `infisical` | `v0.162.7` | Secrets management with PostgreSQL and Redis |
+| `compose` | `r-changedetection` | `0.55.8` | Website change detection and notifications |
+| `compose` | `r-infisical` | `v0.162.7` | Secrets management with PostgreSQL and Redis |
 
 ## Use this library
 
@@ -38,8 +36,8 @@ boilerplates compose generate TEMPLATE --output ./out \
 Examples:
 
 ```bash
-boilerplates compose generate changedetection --output ./changedetection
-boilerplates compose generate infisical --output ./infisical
+boilerplates compose generate r-changedetection --output ./changedetection
+boilerplates compose generate r-infisical --output ./infisical
 ```
 
 ## License

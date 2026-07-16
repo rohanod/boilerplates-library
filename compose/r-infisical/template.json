@@ -1,8 +1,8 @@
 {
-  "slug": "infisical-compose",
+  "slug": "r-infisical",
   "kind": "compose",
   "metadata": {
-    "name": "Infisical",
+    "name": "r-infisical",
     "description": "Open-source secrets management platform for teams and homelabs, including PostgreSQL, Redis, SMTP, and Traefik-friendly Docker Compose configuration.",
     "tags": [
       "secrets",

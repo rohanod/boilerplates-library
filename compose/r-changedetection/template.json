@@ -1,8 +1,8 @@
 {
-  "slug": "changedetection",
+  "slug": "r-changedetection",
   "kind": "compose",
   "metadata": {
-    "name": "changedetection.io",
+    "name": "r-changedetection",
     "description": "Self-hosted website change detection and notification tool. Monitors pages for content changes and can alert via many notification channels.",
     "tags": [
       "monitoring",
