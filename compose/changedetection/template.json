@@ -1,0 +1,272 @@
+{
+  "slug": "changedetection",
+  "kind": "compose",
+  "metadata": {
+    "name": "changedetection.io",
+    "description": "Self-hosted website change detection and notification tool. Monitors pages for content changes and can alert via many notification channels.",
+    "tags": [
+      "monitoring",
+      "traefik",
+      "volumes"
+    ],
+    "icon": {
+      "provider": "selfhst",
+      "id": "changedetection"
+    },
+    "draft": false,
+    "version": {
+      "name": "0.55.8",
+      "source_dep_name": "docker.io/dgtlmoon/changedetection.io",
+      "source_dep_version": "0.55.8"
+    }
+  },
+  "variables": [
+    {
+      "title": "General",
+      "name": "general",
+      "items": [
+        {
+          "name": "service_name",
+          "type": "str",
+          "title": "Service Name",
+          "required": false,
+          "default": "changedetection",
+          "config": {
+            "placeholder": "changedetection"
+          }
+        },
+        {
+          "name": "container_timezone",
+          "type": "str",
+          "title": "Container Timezone",
+          "required": false,
+          "default": "Europe/Berlin",
+          "config": {
+            "placeholder": "Europe/Berlin"
+          }
+        },
+        {
+          "name": "restart_policy",
+          "type": "enum",
+          "title": "Restart Policy",
+          "required": true,
+          "default": "unless-stopped",
+          "config": {
+            "options": [
+              "unless-stopped",
+              "always",
+              "on-failure",
+              "no"
+            ]
+          }
+        },
+        {
+          "name": "base_url",
+          "type": "str",
+          "title": "Base URL",
+          "required": false,
+          "default": "http://localhost:5000",
+          "description": "Public URL used in notification links. Use your Traefik host when reverse-proxied.",
+          "config": {
+            "placeholder": "https://changedetection.home.arpa"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Ports",
+      "name": "ports",
+      "items": [
+        {
+          "name": "ports_http",
+          "type": "str",
+          "title": "HTTP Port",
+          "required": false,
+          "default": "5000",
+          "description": "Host port exposed when Traefik integration is disabled.",
+          "config": {
+            "placeholder": "5000"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Traefik",
+      "name": "traefik",
+      "toggle": "traefik_enabled",
+      "items": [
+        {
+          "name": "traefik_enabled",
+          "type": "bool",
+          "title": "Traefik",
+          "required": false,
+          "default": false,
+          "description": "Attach to an external Traefik network and create routing labels."
+        },
+        {
+          "name": "traefik_host",
+          "type": "str",
+          "title": "Host",
+          "required": true,
+          "default": "changedetection",
+          "needs": [
+            "traefik_enabled=true"
+          ],
+          "config": {
+            "placeholder": "changedetection"
+          }
+        },
+        {
+          "name": "traefik_domain",
+          "type": "str",
+          "title": "Domain",
+          "required": true,
+          "default": "home.arpa",
+          "needs": [
+            "traefik_enabled=true"
+          ],
+          "config": {
+            "placeholder": "home.arpa"
+          }
+        },
+        {
+          "name": "traefik_entrypoint",
+          "type": "str",
+          "title": "Entrypoint",
+          "required": true,
+          "default": "web",
+          "needs": [
+            "traefik_enabled=true"
+          ],
+          "config": {
+            "placeholder": "web"
+          }
+        },
+        {
+          "name": "traefik_network",
+          "type": "str",
+          "title": "Network",
+          "required": true,
+          "default": "traefik",
+          "needs": [
+            "traefik_enabled=true"
+          ],
+          "config": {
+            "placeholder": "traefik"
+          }
+        },
+        {
+          "name": "traefik_tls_enabled",
+          "type": "bool",
+          "title": "TLS",
+          "required": false,
+          "default": false,
+          "needs": [
+            "traefik_enabled=true"
+          ]
+        },
+        {
+          "name": "traefik_tls_entrypoint",
+          "type": "str",
+          "title": "TLS Entrypoint",
+          "required": true,
+          "default": "websecure",
+          "needs": [
+            "traefik_enabled=true",
+            "traefik_tls_enabled=true"
+          ],
+          "config": {
+            "placeholder": "websecure"
+          }
+        },
+        {
+          "name": "traefik_tls_certresolver",
+          "type": "str",
+          "title": "Cert Resolver",
+          "required": true,
+          "default": "cloudflare",
+          "needs": [
+            "traefik_enabled=true",
+            "traefik_tls_enabled=true"
+          ],
+          "config": {
+            "placeholder": "cloudflare"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Volumes",
+      "name": "volume",
+      "items": [
+        {
+          "name": "volume_mode",
+          "type": "enum",
+          "title": "Volume Mode",
+          "required": true,
+          "default": "local",
+          "description": "Storage mode for changedetection datastore.",
+          "config": {
+            "options": [
+              "local",
+              "mount",
+              "nfs"
+            ]
+          }
+        },
+        {
+          "name": "volume_mount_path",
+          "type": "str",
+          "title": "Mount Path",
+          "required": true,
+          "default": "/data/changedetection",
+          "needs": [
+            "volume_mode=mount"
+          ],
+          "config": {
+            "placeholder": "/data/changedetection"
+          }
+        },
+        {
+          "name": "volume_nfs_server",
+          "type": "str",
+          "title": "NFS Server",
+          "required": true,
+          "default": "NFS_SERVER",
+          "needs": [
+            "volume_mode=nfs"
+          ],
+          "config": {
+            "placeholder": "NFS_SERVER"
+          }
+        },
+        {
+          "name": "volume_nfs_path",
+          "type": "str",
+          "title": "NFS Path",
+          "required": true,
+          "default": "/export/changedetection",
+          "needs": [
+            "volume_mode=nfs"
+          ],
+          "config": {
+            "placeholder": "/export/changedetection"
+          }
+        },
+        {
+          "name": "volume_nfs_options",
+          "type": "str",
+          "title": "NFS Options",
+          "required": true,
+          "default": "rw,nolock,soft",
+          "needs": [
+            "volume_mode=nfs"
+          ],
+          "config": {
+            "placeholder": "rw,nolock,soft"
+          }
+        }
+      ]
+    }
+  ]
+}
