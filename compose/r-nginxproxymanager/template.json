@@ -1,0 +1,292 @@
+{
+  "slug": "r-nginxproxymanager",
+  "kind": "compose",
+  "metadata": {
+    "name": "r-nginxproxymanager",
+    "description": "Nginx Proxy Manager — reverse proxy UI with SSL certificates. Publishes host ports 80/443 for proxy traffic and 81 for the admin UI. Uses SQLite by default.",
+    "tags": [
+      "proxy",
+      "ssl",
+      "traefik",
+      "volumes"
+    ],
+    "icon": {
+      "provider": "selfhst",
+      "id": "nginx-proxy-manager"
+    },
+    "draft": false,
+    "version": {
+      "name": "2.15.1",
+      "source_dep_name": "docker.io/jc21/nginx-proxy-manager",
+      "source_dep_version": "2.15.1"
+    }
+  },
+  "variables": [
+    {
+      "title": "General",
+      "name": "general",
+      "items": [
+        {
+          "name": "service_name",
+          "type": "str",
+          "title": "Service Name",
+          "required": false,
+          "default": "nginxproxymanager",
+          "config": {
+            "placeholder": "nginxproxymanager"
+          }
+        },
+        {
+          "name": "container_timezone",
+          "type": "str",
+          "title": "Container Timezone",
+          "required": false,
+          "default": "Europe/Berlin",
+          "config": {
+            "placeholder": "Europe/Berlin"
+          }
+        },
+        {
+          "name": "restart_policy",
+          "type": "enum",
+          "title": "Restart Policy",
+          "required": true,
+          "default": "unless-stopped",
+          "config": {
+            "options": [
+              "unless-stopped",
+              "always",
+              "on-failure",
+              "no"
+            ]
+          }
+        },
+        {
+          "name": "disable_ipv6",
+          "type": "bool",
+          "title": "Disable IPv6",
+          "required": false,
+          "default": true,
+          "description": "Set DISABLE_IPV6 when the Docker host has no IPv6."
+        }
+      ]
+    },
+    {
+      "title": "Ports",
+      "name": "ports",
+      "items": [
+        {
+          "name": "ports_http",
+          "type": "str",
+          "title": "HTTP Port",
+          "required": false,
+          "default": "80",
+          "description": "Host port for proxied HTTP and ACME HTTP-01 challenges.",
+          "config": {
+            "placeholder": "80"
+          }
+        },
+        {
+          "name": "ports_https",
+          "type": "str",
+          "title": "HTTPS Port",
+          "required": false,
+          "default": "443",
+          "description": "Host port for proxied HTTPS.",
+          "config": {
+            "placeholder": "443"
+          }
+        },
+        {
+          "name": "ports_admin",
+          "type": "str",
+          "title": "Admin UI Port",
+          "required": false,
+          "default": "81",
+          "description": "Host port for the admin UI. Always published; Traefik can also route to it when enabled.",
+          "config": {
+            "placeholder": "81"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Traefik",
+      "name": "traefik",
+      "toggle": "traefik_enabled",
+      "items": [
+        {
+          "name": "traefik_enabled",
+          "type": "bool",
+          "title": "Traefik",
+          "required": false,
+          "default": false,
+          "description": "Attach to an external Traefik network and create routing labels for the admin UI (port 81). Host ports 80/443 stay published for proxy traffic."
+        },
+        {
+          "name": "traefik_host",
+          "type": "str",
+          "title": "Host",
+          "required": true,
+          "default": "npm",
+          "needs": [
+            "traefik_enabled=true"
+          ],
+          "config": {
+            "placeholder": "npm"
+          }
+        },
+        {
+          "name": "traefik_domain",
+          "type": "str",
+          "title": "Domain",
+          "required": true,
+          "default": "home.arpa",
+          "needs": [
+            "traefik_enabled=true"
+          ],
+          "config": {
+            "placeholder": "home.arpa"
+          }
+        },
+        {
+          "name": "traefik_entrypoint",
+          "type": "str",
+          "title": "Entrypoint",
+          "required": true,
+          "default": "web",
+          "needs": [
+            "traefik_enabled=true"
+          ],
+          "config": {
+            "placeholder": "web"
+          }
+        },
+        {
+          "name": "traefik_network",
+          "type": "str",
+          "title": "Network",
+          "required": true,
+          "default": "traefik",
+          "needs": [
+            "traefik_enabled=true"
+          ],
+          "config": {
+            "placeholder": "traefik"
+          }
+        },
+        {
+          "name": "traefik_tls_enabled",
+          "type": "bool",
+          "title": "TLS",
+          "required": false,
+          "default": false,
+          "needs": [
+            "traefik_enabled=true"
+          ]
+        },
+        {
+          "name": "traefik_tls_entrypoint",
+          "type": "str",
+          "title": "TLS Entrypoint",
+          "required": true,
+          "default": "websecure",
+          "needs": [
+            "traefik_enabled=true",
+            "traefik_tls_enabled=true"
+          ],
+          "config": {
+            "placeholder": "websecure"
+          }
+        },
+        {
+          "name": "traefik_tls_certresolver",
+          "type": "str",
+          "title": "Cert Resolver",
+          "required": true,
+          "default": "cloudflare",
+          "needs": [
+            "traefik_enabled=true",
+            "traefik_tls_enabled=true"
+          ],
+          "config": {
+            "placeholder": "cloudflare"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Volumes",
+      "name": "volume",
+      "items": [
+        {
+          "name": "volume_mode",
+          "type": "enum",
+          "title": "Volume Mode",
+          "required": true,
+          "default": "local",
+          "description": "Storage mode for /data and Let's Encrypt certificates.",
+          "config": {
+            "options": [
+              "local",
+              "mount",
+              "nfs"
+            ]
+          }
+        },
+        {
+          "name": "volume_mount_path",
+          "type": "str",
+          "title": "Mount Path",
+          "required": true,
+          "default": "/data/nginxproxymanager",
+          "needs": [
+            "volume_mode=mount"
+          ],
+          "config": {
+            "placeholder": "/data/nginxproxymanager"
+          }
+        },
+        {
+          "name": "volume_nfs_server",
+          "type": "str",
+          "title": "NFS Server",
+          "required": true,
+          "default": "NFS_SERVER",
+          "needs": [
+            "volume_mode=nfs"
+          ],
+          "config": {
+            "placeholder": "NFS_SERVER"
+          }
+        },
+        {
+          "name": "volume_nfs_path",
+          "type": "str",
+          "title": "NFS Path",
+          "required": true,
+          "default": "/export/nginxproxymanager",
+          "needs": [
+            "volume_mode=nfs"
+          ],
+          "config": {
+            "placeholder": "/export/nginxproxymanager"
+          }
+        },
+        {
+          "name": "volume_nfs_options",
+          "type": "str",
+          "title": "NFS Options",
+          "required": true,
+          "default": "rw,nolock,soft",
+          "needs": [
+            "volume_mode=nfs"
+          ],
+          "config": {
+            "placeholder": "rw,nolock,soft"
+          }
+        }
+      ]
+    }
+  ]
+}

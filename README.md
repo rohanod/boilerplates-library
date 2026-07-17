@@ -8,18 +8,27 @@ Original collection: [ChristianLempa/boilerplates-library](https://github.com/Ch
 | --- | --- | --- | --- |
 | `compose` | `r-changedetection` | `0.55.8` | Website change detection and notifications |
 | `compose` | `r-infisical` | `v0.162.7` | Secrets management with PostgreSQL and Redis |
+| `compose` | `r-nginxproxymanager` | `2.15.1` | Reverse proxy UI with SSL certificates |
 
 ## Use this library
 
 Install the [Boilerplates CLI](https://github.com/christianlempa/boilerplates), then add this repo as a template library:
 
 ```bash
-# Add this library (replace NAME if you want a different local library id)
-boilerplates repo add NAME https://github.com/rohanod/boilerplates-library \
-  --branch main
+# Run this outside the managed library directory. Removing a library deletes its checkout.
+cd ~
 
-# Refresh libraries
-boilerplates repo update
+# Add this repository as a root-layout Git library.
+boilerplates repo add rohan \
+  --type git \
+  --url https://github.com/rohanod/boilerplates-library.git \
+  --branch main \
+  --directory . \
+  --enabled \
+  --sync
+
+# Refresh libraries later.
+boilerplates repo update rohan
 
 # List compose templates from this library
 boilerplates compose list
@@ -38,6 +47,7 @@ Examples:
 ```bash
 boilerplates compose generate r-changedetection --output ./changedetection
 boilerplates compose generate r-infisical --output ./infisical
+boilerplates compose generate r-nginxproxymanager --output ./nginxproxymanager
 ```
 
 ## License
