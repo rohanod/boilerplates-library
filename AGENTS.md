@@ -12,6 +12,10 @@ Before creating or implementing a requested tool in this repository:
 
 Clone the original repository into a temporary location when needed. Do not modify the original repository.
 
+## Creating Docker Compose templates
+
+Invoke the repository-local `create-compose-template` skill before creating or adding a Docker Compose template. Follow its upstream lookup, official-version research, implementation, README update, and verification workflow.
+
 ## Template naming
 
 Prefix every template directory and `slug` with `r-` (for example `compose/r-infisical`, slug `r-infisical`). When copying from the original repository, rename to the `r-` form and update the slug and metadata name to match.
