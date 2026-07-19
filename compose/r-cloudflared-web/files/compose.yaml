@@ -1,0 +1,50 @@
+---
+services:
+  << service_name >>:
+    image: docker.io/wisdomsky/cloudflared-web:2026.7.2
+    restart: << restart_policy >>
+    <%- if container_name %>
+    container_name: << container_name >>
+    <%- endif %>
+    network_mode: host
+    environment:
+      - WEBUI_HOST=<< webui_host >>
+      - WEBUI_PORT=<< webui_port >>
+      - EDGE_IP_VERSION=<< edge_ip_version >>
+      - PROTOCOL=<< protocol >>
+      - GRACE_PERIOD=<< grace_period >>
+      - RETRIES=<< retries >>
+      - METRICS_ENABLE=<< metrics_enabled | lower >>
+      <%- if basic_auth_enabled %>
+      - BASIC_AUTH_USER=<< basic_auth_user >>
+      - BASIC_AUTH_PASS=${BASIC_AUTH_PASS}
+      <%- endif %>
+      <%- if edge_bind_address %>
+      - EDGE_BIND_ADDRESS=<< edge_bind_address >>
+      <%- endif %>
+      <%- if region == 'us' %>
+      - REGION=us
+      <%- endif %>
+      <%- if metrics_enabled %>
+      - METRICS_PORT=<< metrics_port >>
+      <%- endif %>
+    volumes:
+      <%- if volume_mode == 'mount' %>
+      - << volume_mount_path >>/config:/config
+      <%- else %>
+      - << service_name >>_config:/config
+      <%- endif %>
+
+<%- if volume_mode == 'local' %>
+volumes:
+  << service_name >>_config:
+    driver: local
+<%- elif volume_mode == 'nfs' %>
+volumes:
+  << service_name >>_config:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=<< volume_nfs_server >>,nfsvers=4,<< volume_nfs_options >>
+      device: ":<< volume_nfs_path >>/config"
+<%- endif %>

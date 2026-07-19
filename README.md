@@ -7,6 +7,7 @@ Original collection: [ChristianLempa/boilerplates-library](https://github.com/Ch
 | Kind | Template | Version | Description |
 | --- | --- | --- | --- |
 | `compose` | `r-changedetection` | `0.55.8` | Website change detection and notifications |
+| `compose` | `r-cloudflared-web` | `2026.7.2` | Cloudflared tunnel client with a web management interface |
 | `compose` | `r-infisical` | `v0.162.7` | Secrets management with PostgreSQL and Redis |
 | `compose` | `r-nginxproxymanager` | `2.15.1` | Reverse proxy UI with SSL certificates |
 
@@ -46,6 +47,7 @@ Examples:
 
 ```bash
 boilerplates compose generate r-changedetection --output ./changedetection
+boilerplates compose generate r-cloudflared-web --output ./cloudflared-web
 boilerplates compose generate r-infisical --output ./infisical
 boilerplates compose generate r-nginxproxymanager --output ./nginxproxymanager
 ```
