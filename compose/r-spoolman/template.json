@@ -1,0 +1,446 @@
+{
+  "slug": "r-spoolman",
+  "kind": "compose",
+  "metadata": {
+    "name": "r-spoolman",
+    "description": "Spoolman filament inventory manager for tracking spools, usage, locations, and printer integrations.",
+    "tags": [
+      "3d-printing",
+      "filament",
+      "inventory",
+      "traefik",
+      "volumes"
+    ],
+    "icon": {
+      "provider": "selfhst",
+      "id": "spoolman"
+    },
+    "draft": false,
+    "version": {
+      "name": "0.24.0",
+      "source_dep_name": "ghcr.io/donkie/spoolman",
+      "source_dep_version": "0.24.0"
+    }
+  },
+  "variables": [
+    {
+      "title": "General",
+      "name": "general",
+      "items": [
+        {
+          "name": "service_name",
+          "type": "str",
+          "title": "Service Name",
+          "required": false,
+          "default": "spoolman",
+          "config": {
+            "placeholder": "spoolman"
+          }
+        },
+        {
+          "name": "container_timezone",
+          "type": "str",
+          "title": "Container Timezone",
+          "required": true,
+          "default": "Europe/Berlin",
+          "config": {
+            "placeholder": "Europe/Berlin"
+          }
+        },
+        {
+          "name": "puid",
+          "type": "int",
+          "title": "User ID",
+          "required": true,
+          "default": 1000,
+          "description": "UID used by the application and persistent files."
+        },
+        {
+          "name": "pgid",
+          "type": "int",
+          "title": "Group ID",
+          "required": true,
+          "default": 1000,
+          "description": "GID used by the application and persistent files."
+        },
+        {
+          "name": "restart_policy",
+          "type": "enum",
+          "title": "Restart Policy",
+          "required": true,
+          "default": "unless-stopped",
+          "config": {
+            "options": [
+              "unless-stopped",
+              "always",
+              "on-failure",
+              "no"
+            ]
+          }
+        },
+        {
+          "name": "logging_level",
+          "type": "enum",
+          "title": "Logging Level",
+          "required": true,
+          "default": "INFO",
+          "config": {
+            "options": [
+              "DEBUG",
+              "INFO",
+              "WARNING",
+              "ERROR",
+              "CRITICAL"
+            ]
+          }
+        },
+        {
+          "name": "automatic_backup",
+          "type": "bool",
+          "title": "Automatic SQLite Backup",
+          "required": false,
+          "default": true,
+          "description": "Create nightly backups when using SQLite."
+        }
+      ]
+    },
+    {
+      "title": "Ports",
+      "name": "ports",
+      "items": [
+        {
+          "name": "ports_http",
+          "type": "str",
+          "title": "HTTP Port",
+          "required": true,
+          "default": "7912",
+          "description": "Host port exposed when Traefik integration is disabled.",
+          "config": {
+            "placeholder": "7912"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Application",
+      "name": "application",
+      "items": [
+        {
+          "name": "base_path",
+          "type": "str",
+          "title": "Base Path",
+          "required": false,
+          "description": "Optional URL subpath such as /spoolman.",
+          "config": {
+            "placeholder": "/spoolman"
+          }
+        },
+        {
+          "name": "metrics_enabled",
+          "type": "bool",
+          "title": "Prometheus Metrics",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "cors_origin",
+          "type": "str",
+          "title": "CORS Origins",
+          "required": false,
+          "description": "Comma-separated allowed origins. Avoid * unless unrestricted cross-origin access is intentional.",
+          "config": {
+            "placeholder": "https://printer.example.com"
+          }
+        },
+        {
+          "name": "external_db_url",
+          "type": "str",
+          "title": "External Filament Database URL",
+          "required": false,
+          "default": "https://donkie.github.io/SpoolmanDB/",
+          "description": "Source used to import filament data. Leave empty to disable imports.",
+          "config": {
+            "placeholder": "https://donkie.github.io/SpoolmanDB/"
+          }
+        },
+        {
+          "name": "external_db_sync_interval",
+          "type": "int",
+          "title": "External Database Sync Interval",
+          "required": true,
+          "default": 3600,
+          "description": "Synchronization interval in seconds. Use 0 to disable periodic synchronization."
+        }
+      ]
+    },
+    {
+      "title": "Database",
+      "name": "database",
+      "items": [
+        {
+          "name": "database_type",
+          "type": "enum",
+          "title": "Database Type",
+          "required": true,
+          "default": "sqlite",
+          "config": {
+            "options": [
+              "sqlite",
+              "postgresql",
+              "mysql",
+              "cockroachdb"
+            ]
+          }
+        },
+        {
+          "name": "database_host",
+          "type": "str",
+          "title": "Database Host",
+          "required": true,
+          "needs": [
+            "database_type!=sqlite"
+          ],
+          "config": {
+            "placeholder": "database.example.com"
+          }
+        },
+        {
+          "name": "database_port",
+          "type": "int",
+          "title": "Database Port",
+          "required": true,
+          "default": 5432,
+          "needs": [
+            "database_type!=sqlite"
+          ]
+        },
+        {
+          "name": "database_name",
+          "type": "str",
+          "title": "Database Name",
+          "required": true,
+          "default": "spoolman",
+          "needs": [
+            "database_type!=sqlite"
+          ],
+          "config": {
+            "placeholder": "spoolman"
+          }
+        },
+        {
+          "name": "database_username",
+          "type": "str",
+          "title": "Database Username",
+          "required": true,
+          "default": "spoolman",
+          "needs": [
+            "database_type!=sqlite"
+          ],
+          "config": {
+            "placeholder": "spoolman"
+          }
+        },
+        {
+          "name": "database_password",
+          "type": "secret",
+          "title": "Database Password",
+          "required": true,
+          "needs": [
+            "database_type!=sqlite"
+          ]
+        },
+        {
+          "name": "database_query",
+          "type": "str",
+          "title": "Database Query Options",
+          "required": false,
+          "needs": [
+            "database_type!=sqlite"
+          ],
+          "description": "Optional database connection query parameters.",
+          "config": {
+            "placeholder": "ssl=true"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Traefik",
+      "name": "traefik",
+      "toggle": "traefik_enabled",
+      "items": [
+        {
+          "name": "traefik_enabled",
+          "type": "bool",
+          "title": "Traefik",
+          "required": false,
+          "default": false,
+          "description": "Attach to an external Traefik network and create routing labels."
+        },
+        {
+          "name": "traefik_host",
+          "type": "str",
+          "title": "Host",
+          "required": true,
+          "default": "spoolman",
+          "needs": [
+            "traefik_enabled=true"
+          ],
+          "config": {
+            "placeholder": "spoolman"
+          }
+        },
+        {
+          "name": "traefik_domain",
+          "type": "str",
+          "title": "Domain",
+          "required": true,
+          "default": "home.arpa",
+          "needs": [
+            "traefik_enabled=true"
+          ],
+          "config": {
+            "placeholder": "home.arpa"
+          }
+        },
+        {
+          "name": "traefik_entrypoint",
+          "type": "str",
+          "title": "Entrypoint",
+          "required": true,
+          "default": "web",
+          "needs": [
+            "traefik_enabled=true"
+          ],
+          "config": {
+            "placeholder": "web"
+          }
+        },
+        {
+          "name": "traefik_network",
+          "type": "str",
+          "title": "Network",
+          "required": true,
+          "default": "traefik",
+          "needs": [
+            "traefik_enabled=true"
+          ],
+          "config": {
+            "placeholder": "traefik"
+          }
+        },
+        {
+          "name": "traefik_tls_enabled",
+          "type": "bool",
+          "title": "TLS",
+          "required": false,
+          "default": false,
+          "needs": [
+            "traefik_enabled=true"
+          ]
+        },
+        {
+          "name": "traefik_tls_entrypoint",
+          "type": "str",
+          "title": "TLS Entrypoint",
+          "required": true,
+          "default": "websecure",
+          "needs": [
+            "traefik_enabled=true",
+            "traefik_tls_enabled=true"
+          ],
+          "config": {
+            "placeholder": "websecure"
+          }
+        },
+        {
+          "name": "traefik_tls_certresolver",
+          "type": "str",
+          "title": "Cert Resolver",
+          "required": true,
+          "default": "cloudflare",
+          "needs": [
+            "traefik_enabled=true",
+            "traefik_tls_enabled=true"
+          ],
+          "config": {
+            "placeholder": "cloudflare"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Volumes",
+      "name": "volume",
+      "items": [
+        {
+          "name": "volume_mode",
+          "type": "enum",
+          "title": "Volume Mode",
+          "required": true,
+          "default": "local",
+          "description": "Storage mode for the SQLite database, backups, and logs. SQLite on NFS may be unreliable; prefer an external database when using NFS.",
+          "config": {
+            "options": [
+              "local",
+              "mount",
+              "nfs"
+            ]
+          }
+        },
+        {
+          "name": "volume_mount_path",
+          "type": "str",
+          "title": "Mount Path",
+          "required": true,
+          "default": "/data/spoolman",
+          "needs": [
+            "volume_mode=mount"
+          ],
+          "config": {
+            "placeholder": "/data/spoolman"
+          }
+        },
+        {
+          "name": "volume_nfs_server",
+          "type": "str",
+          "title": "NFS Server",
+          "required": true,
+          "default": "NFS_SERVER",
+          "needs": [
+            "volume_mode=nfs"
+          ],
+          "config": {
+            "placeholder": "NFS_SERVER"
+          }
+        },
+        {
+          "name": "volume_nfs_path",
+          "type": "str",
+          "title": "NFS Path",
+          "required": true,
+          "default": "/export/spoolman",
+          "needs": [
+            "volume_mode=nfs"
+          ],
+          "config": {
+            "placeholder": "/export/spoolman"
+          }
+        },
+        {
+          "name": "volume_nfs_options",
+          "type": "str",
+          "title": "NFS Options",
+          "required": true,
+          "default": "rw,nolock,soft",
+          "needs": [
+            "volume_mode=nfs"
+          ],
+          "config": {
+            "placeholder": "rw,nolock,soft"
+          }
+        }
+      ]
+    }
+  ]
+}

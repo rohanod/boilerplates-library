@@ -1,0 +1,86 @@
+---
+services:
+  << service_name >>:
+    image: ghcr.io/maziggy/bambuddy:0.2.4.9
+    restart: << restart_policy >>
+    stop_grace_period: << stop_grace_period >>
+    <%- if container_name %>
+    container_name: << container_name >>
+    <%- endif %>
+    cap_add:
+      - NET_BIND_SERVICE
+    <%- if network_mode == 'host' %>
+    network_mode: host
+    <%- else %>
+    ports:
+      - "<< ports_web >>:<< application_port >>"
+      <%- if virtual_printer_enabled %>
+      - "3000:3000"
+      - "3002:3002"
+      - "8883:8883"
+      - "990:990"
+      - "6000:6000"
+      - "322:322"
+      - "2024-2026:2024-2026"
+      - "50000-50029:50000-50029"
+      <%- endif %>
+    <%- endif %>
+    environment:
+      - TZ=<< container_timezone >>
+      - PUID=<< puid >>
+      - PGID=<< pgid >>
+      - PORT=<< application_port >>
+      - DEBUG=<< debug_enabled | lower >>
+      - LOG_LEVEL=<< log_level >>
+      <%- if network_mode == 'bridge' and virtual_printer_enabled %>
+      - VIRTUAL_PRINTER_PASV_ADDRESS=<< virtual_printer_pasv_address >>
+      <%- endif %>
+      <%- if home_assistant_enabled %>
+      - HA_URL=<< home_assistant_url >>
+      - HA_TOKEN=${HA_TOKEN}
+      <%- endif %>
+      <%- if trusted_frame_origins %>
+      - TRUSTED_FRAME_ORIGINS=<< trusted_frame_origins >>
+      <%- endif %>
+      <%- if external_database_enabled %>
+      - DATABASE_URL=${DATABASE_URL}
+      <%- endif %>
+      <%- if slicer_api_url %>
+      - SLICER_API_URL=<< slicer_api_url >>
+      <%- endif %>
+      <%- if external_library_enabled %>
+      - BAMBUDDY_EXTERNAL_ROOTS=<< external_library_container_path >>
+      <%- endif %>
+    volumes:
+      <%- if volume_mode == 'mount' %>
+      - << volume_mount_path >>/data:/app/data
+      - << volume_mount_path >>/logs:/app/logs
+      <%- else %>
+      - << service_name >>_data:/app/data
+      - << service_name >>_logs:/app/logs
+      <%- endif %>
+      <%- if external_library_enabled %>
+      - << external_library_host_path >>:<< external_library_container_path >>:ro
+      <%- endif %>
+
+<%- if volume_mode == 'local' %>
+volumes:
+  << service_name >>_data:
+    driver: local
+  << service_name >>_logs:
+    driver: local
+<%- elif volume_mode == 'nfs' %>
+volumes:
+  << service_name >>_data:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=<< volume_nfs_server >>,nfsvers=4,<< volume_nfs_options >>
+      device: ":<< volume_nfs_path >>/data"
+  << service_name >>_logs:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=<< volume_nfs_server >>,nfsvers=4,<< volume_nfs_options >>
+      device: ":<< volume_nfs_path >>/logs"
+<%- endif %>
