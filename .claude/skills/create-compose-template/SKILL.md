@@ -107,6 +107,8 @@ boilerplates compose generate r-<name> --output ./<name>
 
 ## 8. Verify before reporting completion
 
+Never start containers, run generated workloads, or otherwise execute a Compose stack on the user's host. Verification must remain static and isolated; `docker compose config` is allowed because it only parses and renders configuration.
+
 At minimum:
 
 1. Parse `template.json` as JSON.
