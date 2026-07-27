@@ -16,11 +16,16 @@ services:
       - << service_name >>_data:/data
       <%- endif %>
     networks:
-      - << service_name >>_backend
+      << service_name >>_backend:
       <%- if traefik_enabled %>
-      - << traefik_network >>
+      << traefik_network >>:
       <%- endif %>
-    <%- if not traefik_enabled %>
+      <%- if npm_proxy_enabled %>
+      npm-proxy:
+        aliases:
+          - karakeep-web
+      <%- endif %>
+    <%- if not traefik_enabled and not npm_proxy_enabled %>
     ports:
       - "<< ports_http >>:3000"
     <%- endif %>
@@ -75,6 +80,10 @@ networks:
     driver: bridge
   <%- if traefik_enabled %>
   << traefik_network >>:
+    external: true
+  <%- endif %>
+  <%- if npm_proxy_enabled %>
+  npm-proxy:
     external: true
   <%- endif %>
 

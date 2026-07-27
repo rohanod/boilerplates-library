@@ -114,7 +114,11 @@
           "title": "HTTP Port",
           "required": true,
           "default": "7912",
-          "description": "Host port exposed when Traefik integration is disabled.",
+          "description": "Host port exposed when Traefik and Nginx Proxy Manager integrations are disabled.",
+          "needs": [
+            "traefik_enabled=false",
+            "npm_proxy_enabled=false"
+          ],
           "config": {
             "placeholder": "7912"
           }
@@ -366,6 +370,21 @@
           "config": {
             "placeholder": "cloudflare"
           }
+        }
+      ]
+    },
+    {
+      "title": "Nginx Proxy Manager",
+      "name": "nginx_proxy_manager",
+      "toggle": "npm_proxy_enabled",
+      "items": [
+        {
+          "name": "npm_proxy_enabled",
+          "type": "bool",
+          "title": "Nginx Proxy Manager",
+          "required": false,
+          "default": false,
+          "description": "Attach to the existing external npm-proxy network. In Nginx Proxy Manager, use hostname spoolman-web and port 8000."
         }
       ]
     },

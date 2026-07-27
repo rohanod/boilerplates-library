@@ -16,10 +16,21 @@ services:
       <%- else %>
       - << service_name >>_data:/data
       <%- endif %>
-    <%- if traefik_enabled %>
+    <%- if traefik_enabled or npm_proxy_enabled %>
     networks:
-      - << traefik_network >>
-    <%- else %>
+      <%- if npm_proxy_enabled %>
+      default:
+      <%- endif %>
+      <%- if traefik_enabled %>
+      << traefik_network >>:
+      <%- endif %>
+      <%- if npm_proxy_enabled %>
+      npm-proxy:
+        aliases:
+          - tinyauth-web
+      <%- endif %>
+    <%- endif %>
+    <%- if not traefik_enabled and not npm_proxy_enabled %>
     ports:
       - "<< ports_http >>:3000"
     <%- endif %>
@@ -54,8 +65,17 @@ volumes:
       device: ":<< volume_nfs_path >>"
 <%- endif %>
 
-<%- if traefik_enabled %>
+<%- if traefik_enabled or npm_proxy_enabled %>
 networks:
+  <%- if npm_proxy_enabled %>
+  default:
+  <%- endif %>
+  <%- if traefik_enabled %>
   << traefik_network >>:
     external: true
-<%- endif %}
+  <%- endif %>
+  <%- if npm_proxy_enabled %>
+  npm-proxy:
+    external: true
+  <%- endif %>
+<%- endif %>

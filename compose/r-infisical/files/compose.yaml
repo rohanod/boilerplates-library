@@ -36,11 +36,16 @@ services:
       <%- endif %>
     <%- endif %>
     networks:
-      - << service_name or 'infisical' >>_backend
+      << service_name or 'infisical' >>_backend:
       <%- if traefik_enabled %>
-      - << traefik_network >>
+      << traefik_network >>:
       <%- endif %>
-    <%- if not traefik_enabled %>
+      <%- if npm_proxy_enabled %>
+      npm-proxy:
+        aliases:
+          - infisical-web
+      <%- endif %>
+    <%- if not traefik_enabled and not npm_proxy_enabled %>
     ports:
       - "<< ports_http >>:8080"
     <%- endif %>
@@ -104,6 +109,10 @@ networks:
     driver: bridge
   <%- if traefik_enabled %>
   << traefik_network >>:
+    external: true
+  <%- endif %>
+  <%- if npm_proxy_enabled %>
+  npm-proxy:
     external: true
   <%- endif %>
 

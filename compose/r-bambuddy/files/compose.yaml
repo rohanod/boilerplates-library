@@ -12,8 +12,11 @@ services:
     <%- if network_mode == 'host' %>
     network_mode: host
     <%- else %>
+    <%- if (not npm_proxy_enabled) or virtual_printer_enabled %>
     ports:
+      <%- if not npm_proxy_enabled %>
       - "<< ports_web >>:<< application_port >>"
+      <%- endif %>
       <%- if virtual_printer_enabled %>
       - "3000:3000"
       - "3002:3002"
@@ -24,6 +27,14 @@ services:
       - "2024-2026:2024-2026"
       - "50000-50029:50000-50029"
       <%- endif %>
+    <%- endif %>
+    <%- if npm_proxy_enabled %>
+    networks:
+      default:
+      npm-proxy:
+        aliases:
+          - bambuddy-web
+    <%- endif %>
     <%- endif %>
     environment:
       - TZ=<< container_timezone >>
@@ -83,4 +94,11 @@ volumes:
       type: nfs
       o: addr=<< volume_nfs_server >>,nfsvers=4,<< volume_nfs_options >>
       device: ":<< volume_nfs_path >>/logs"
+<%- endif %>
+
+<%- if network_mode == 'bridge' and npm_proxy_enabled %>
+networks:
+  default:
+  npm-proxy:
+    external: true
 <%- endif %>

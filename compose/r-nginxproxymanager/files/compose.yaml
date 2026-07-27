@@ -20,9 +20,19 @@ services:
       - "<< ports_http >>:80"
       - "<< ports_https >>:443"
       - "<< ports_admin >>:81"
-    <%- if traefik_enabled %>
+    <%- if traefik_enabled or npm_proxy_enabled %>
     networks:
+      <%- if npm_proxy_enabled %>
+      - default
+      <%- endif %>
+      <%- if traefik_enabled %>
       - << traefik_network >>
+      <%- endif %>
+      <%- if npm_proxy_enabled %>
+      - npm-proxy
+      <%- endif %>
+    <%- endif %>
+    <%- if traefik_enabled %>
     labels:
       - traefik.enable=true
       - traefik.docker.network=<< traefik_network >>
@@ -61,8 +71,17 @@ volumes:
       device: ":<< volume_nfs_path >>/letsencrypt"
 <%- endif %>
 
-<%- if traefik_enabled %>
+<%- if traefik_enabled or npm_proxy_enabled %>
 networks:
+  <%- if npm_proxy_enabled %>
+  default:
+  <%- endif %>
+  <%- if traefik_enabled %>
   << traefik_network >>:
     external: true
+  <%- endif %>
+  <%- if npm_proxy_enabled %>
+  npm-proxy:
+    external: true
+  <%- endif %>
 <%- endif %>
