@@ -216,6 +216,21 @@
       ]
     },
     {
+      "title": "Nginx Proxy Manager Network",
+      "name": "nginx_proxy_manager_network",
+      "toggle": "npm_proxy_enabled",
+      "items": [
+        {
+          "name": "npm_proxy_enabled",
+          "type": "bool",
+          "title": "Connect to npm-proxy",
+          "required": false,
+          "default": false,
+          "description": "Attach Nginx Proxy Manager to the existing external npm-proxy network so it can reach applications that enable Nginx Proxy Manager integration. Ports 80, 81, and 443 remain published."
+        }
+      ]
+    },
+    {
       "title": "Volumes",
       "name": "volume",
       "items": [

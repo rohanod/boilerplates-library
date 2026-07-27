@@ -13,6 +13,7 @@ Original collection: [ChristianLempa/boilerplates-library](https://github.com/Ch
 | `compose` | `r-karakeep` | `0.32.0` | Bookmark archiving, full-text search, and optional AI tagging |
 | `compose` | `r-nginxproxymanager` | `2.15.1` | Reverse proxy UI with SSL certificates |
 | `compose` | `r-spoolman` | `0.24.0` | Filament spool inventory and usage tracking |
+| `compose` | `r-tinyauth` | `v5.1.2` | Lightweight authentication gateway for protecting self-hosted applications |
 
 ## Use this library
 
@@ -56,6 +57,7 @@ boilerplates compose generate r-infisical --output ./infisical
 boilerplates compose generate r-karakeep --output ./karakeep
 boilerplates compose generate r-nginxproxymanager --output ./nginxproxymanager
 boilerplates compose generate r-spoolman --output ./spoolman
+boilerplates compose generate r-tinyauth --output ./tinyauth
 ```
 
 ## Update template versions

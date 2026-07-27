@@ -158,7 +158,8 @@
           "required": true,
           "default": "8000",
           "needs": [
-            "network_mode=bridge"
+            "network_mode=bridge",
+            "npm_proxy_enabled=false"
           ],
           "config": {
             "placeholder": "8000"
@@ -189,6 +190,24 @@
           "config": {
             "placeholder": "192.168.1.100"
           }
+        }
+      ]
+    },
+    {
+      "title": "Nginx Proxy Manager",
+      "name": "nginx_proxy_manager",
+      "toggle": "npm_proxy_enabled",
+      "items": [
+        {
+          "name": "npm_proxy_enabled",
+          "type": "bool",
+          "title": "Nginx Proxy Manager",
+          "required": false,
+          "default": false,
+          "needs": [
+            "network_mode=bridge"
+          ],
+          "description": "Attach BamBuddy to the existing external npm-proxy network and suppress only the Web UI host port. Virtual-printer ports remain published. In Nginx Proxy Manager, use hostname bambuddy-web and the configured application port."
         }
       ]
     },

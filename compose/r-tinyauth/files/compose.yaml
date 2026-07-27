@@ -1,42 +1,44 @@
 ---
 services:
   << service_name >>:
-    image: docker.io/jc21/nginx-proxy-manager:2.15.1
+    image: ghcr.io/tinyauthapp/tinyauth:v5.1.2
     restart: << restart_policy >>
+    env_file:
+      - .env
     environment:
-      - TZ=<< container_timezone >>
-      <%- if disable_ipv6 %>
-      - DISABLE_IPV6=true
-      <%- endif %>
+      - TINYAUTH_APPURL=<< app_url >>
+      - TINYAUTH_AUTH_TRUSTEDPROXIES=<< trusted_proxies >>
+      - TINYAUTH_AUTH_SECURECOOKIE=<< secure_cookie | upper >>
+      - TINYAUTH_DATABASE_PATH=/data/tinyauth.db
     volumes:
       <%- if volume_mode == 'mount' %>
-      - << volume_mount_path >>/data:/data
-      - << volume_mount_path >>/letsencrypt:/etc/letsencrypt
+      - << volume_mount_path >>:/data
       <%- else %>
       - << service_name >>_data:/data
-      - << service_name >>_letsencrypt:/etc/letsencrypt
       <%- endif %>
-    ports:
-      - "<< ports_http >>:80"
-      - "<< ports_https >>:443"
-      - "<< ports_admin >>:81"
     <%- if traefik_enabled or npm_proxy_enabled %>
     networks:
       <%- if npm_proxy_enabled %>
-      - default
+      default:
       <%- endif %>
       <%- if traefik_enabled %>
-      - << traefik_network >>
+      << traefik_network >>:
       <%- endif %>
       <%- if npm_proxy_enabled %>
-      - npm-proxy
+      npm-proxy:
+        aliases:
+          - tinyauth-web
       <%- endif %>
+    <%- endif %>
+    <%- if not traefik_enabled and not npm_proxy_enabled %>
+    ports:
+      - "<< ports_http >>:3000"
     <%- endif %>
     <%- if traefik_enabled %>
     labels:
       - traefik.enable=true
       - traefik.docker.network=<< traefik_network >>
-      - traefik.http.services.<< service_name >>-web.loadBalancer.server.port=81
+      - traefik.http.services.<< service_name >>-web.loadBalancer.server.port=3000
       - traefik.http.routers.<< service_name >>-http.service=<< service_name >>-web
       - traefik.http.routers.<< service_name >>-http.rule=Host(`<< traefik_host >>.<< traefik_domain >>`)
       - traefik.http.routers.<< service_name >>-http.entrypoints=<< traefik_entrypoint >>
@@ -53,8 +55,6 @@ services:
 volumes:
   << service_name >>_data:
     driver: local
-  << service_name >>_letsencrypt:
-    driver: local
 <%- elif volume_mode == 'nfs' %>
 volumes:
   << service_name >>_data:
@@ -62,13 +62,7 @@ volumes:
     driver_opts:
       type: nfs
       o: addr=<< volume_nfs_server >>,nfsvers=4,<< volume_nfs_options >>
-      device: ":<< volume_nfs_path >>/data"
-  << service_name >>_letsencrypt:
-    driver: local
-    driver_opts:
-      type: nfs
-      o: addr=<< volume_nfs_server >>,nfsvers=4,<< volume_nfs_options >>
-      device: ":<< volume_nfs_path >>/letsencrypt"
+      device: ":<< volume_nfs_path >>"
 <%- endif %>
 
 <%- if traefik_enabled or npm_proxy_enabled %>
