@@ -1,0 +1,63 @@
+logging_level:
+  type: str
+  help: Logging Level
+  default: INFO
+  choices:
+  - DEBUG
+  - INFO
+  - WARNING
+  - ERROR
+  - CRITICAL
+  when: << template == 'r-spoolman' >>
+automatic_backup:
+  type: bool
+  help: Create nightly backups when using SQLite.
+  default: true
+  when: << template == 'r-spoolman' >>
+base_path:
+  type: str
+  help: Optional URL subpath such as /spoolman.
+  default: ''
+  placeholder: /spoolman
+  when: << template == 'r-spoolman' >>
+cors_origin:
+  type: str
+  help: Comma-separated allowed origins. Avoid * unless unrestricted cross-origin access is intentional.
+  default: ''
+  placeholder: https://printer.example.com
+  when: << template == 'r-spoolman' >>
+external_db_url:
+  type: str
+  help: Source used to import filament data. Leave empty to disable imports.
+  default: https://donkie.github.io/SpoolmanDB/
+  placeholder: https://donkie.github.io/SpoolmanDB/
+  when: << template == 'r-spoolman' >>
+external_db_sync_interval:
+  type: int
+  help: Synchronization interval in seconds. Use 0 to disable periodic synchronization.
+  default: 3600
+  when: << template == 'r-spoolman' >>
+database_host:
+  type: str
+  help: Database Host
+  default: ''
+  placeholder: database.example.com
+  when: << template == 'r-spoolman' and database_type != 'sqlite' >>
+  validator: <% if not database_host | string | trim %>Database Host is required.<% endif %>
+database_port:
+  type: int
+  help: Database Port
+  default: 5432
+  when: << template == 'r-spoolman' and database_type != 'sqlite' >>
+database_username:
+  type: str
+  help: Database Username
+  default: spoolman
+  placeholder: spoolman
+  when: << template == 'r-spoolman' and database_type != 'sqlite' >>
+database_query:
+  type: str
+  help: Optional database connection query parameters.
+  default: ''
+  placeholder: ssl=true
+  when: << template == 'r-spoolman' and database_type != 'sqlite' >>

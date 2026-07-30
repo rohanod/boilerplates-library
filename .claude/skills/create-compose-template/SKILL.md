@@ -1,22 +1,22 @@
 ---
 name: create-compose-template
 description: Create or add a Docker Compose template in this repository. Use whenever a user asks for a new Compose workload, stack, service, app, or self-hosted tool template.
-version: 1.0.0
+version: 2.0.0
 ---
 
 # Create a Docker Compose Template
 
-Build the smallest useful template that follows this repository's conventions.
+Build the smallest useful template that follows this repository's Copier conventions.
 
 ## 1. Read the repository rules
 
-Read `AGENTS.md` before making changes. Its upstream, naming, and commit rules are mandatory.
+Read `AGENTS.md` before making changes. Its upstream, naming, Copier, and commit rules are mandatory.
 
 ## 2. Check the original library first
 
 Search `https://github.com/ChristianLempa/boilerplates-library` for the requested tool and common name variants.
 
-- If it exists, clone or fetch the original repository into a temporary/cache location and copy only that template and its required files.
+- If it exists, clone or fetch the original repository into a temporary or cached location and copy only that template and its required files.
 - If it does not exist, create the template from the project's official documentation.
 - Never modify the original repository checkout.
 
@@ -24,7 +24,7 @@ Search `https://github.com/ChristianLempa/boilerplates-library` for the requeste
 
 Use official application and container documentation to identify:
 
-- the latest stable, versioned container image (never use a floating `latest` tag),
+- the latest stable, versioned container image; never use a floating `latest` tag,
 - required and optional ports,
 - persistent paths,
 - supported environment variables and secrets,
@@ -39,9 +39,9 @@ Inspect existing templates before writing:
 
 - `compose/r-changedetection/` for a simple single-service app,
 - `compose/r-infisical/` for an app with supporting services, secrets, and `.env`,
-- `compose/r-nginxproxymanager/` for multiple ports and multiple persistent paths.
+- `compose/r-nginxproxymanager/` for multiple ports and persistent paths.
 
-Reuse their variable shapes and template syntax instead of inventing new conventions.
+Reuse existing root questions and payload syntax instead of inventing new conventions.
 
 ## 5. Create the template
 
@@ -49,91 +49,66 @@ Use this layout:
 
 ```text
 compose/r-<name>/
-├── template.json
+├── questions.yml
 └── files/
+    ├── .copier-answers.yml
     ├── compose.yaml
-    └── .env                 # only when generated secrets/config require it
+    └── .env                 # only when needed
 ```
 
-Keep these values identical:
+Add `r-<name>` to the root `template` choices and add a root `!include` for the new `questions.yml`. Never add a nested `copier.yml`.
 
-- directory: `compose/r-<name>`
-- `slug`: `r-<name>`
-- `metadata.name`: `r-<name>`
-
-`template.json` must contain:
-
-- `kind: "compose"`,
-- a practical description, tags, icon, and `draft: false`,
-- pinned `metadata.version.name`, `source_dep_name`, and `source_dep_version`,
-- grouped variables with types, defaults, descriptions, and `needs` conditions.
-
-The pinned image tag in `files/compose.yaml` must match the version metadata.
+Keep shared question names in root `copier.yml`. Put only unique questions in the fragment, and include `template == 'r-<name>'` in every `when` condition. Controller questions must appear before questions whose `when` or default references them.
 
 Use the repository delimiters:
 
 - values: `<< variable >>`
-- conditions/loops: `<% ... %>` / `<%- ... %>`
+- conditions and loops: `<% ... %>` / `<%- ... %>`
 - comments: `<# ... #>`
 
 ## 6. Expose useful configuration
 
-Represent application-supported choices in `template.json` when relevant:
+Expose only application-supported choices used by the generated files. Reuse established questions for service names, restart policies, proxy integrations, ports, and storage.
 
-- service/container name,
-- timezone and restart policy,
-- host ports,
-- application URLs and settings,
-- credentials and generated secrets,
-- optional external dependencies,
-- optional Traefik routing and TLS,
-- persistent storage.
-
-For persistent data, use the established `volume_mode` choices when they fit:
+For persistent data, use `volume_mode` when it fits:
 
 - `local`: Docker-managed named volumes,
 - `mount`: host bind mounts under `volume_mount_path`,
 - `nfs`: named volumes using `volume_nfs_server`, `volume_nfs_path`, and `volume_nfs_options`.
 
-Only expose options the generated files actually use. Do not add speculative settings "for later."
+User-supplied credentials use `type: str` and `secret: true`. For automatically generated credentials, add an explicit sentinel to `.env` and extend the idempotent copy task in root `copier.yml`; reuse the same sentinel everywhere the value must match. The task must use local tooling only and must not perform network or deployment side effects.
 
 ## 7. Update the README
 
-Add the template to the table in `README.md` and add a generation example:
+Add the template to the table and add a Copier example:
 
 ```bash
-boilerplates compose generate r-<name> --output ./<name>
+copier copy --trust -d template=r-<name> gh:rohanod/boilerplates-library ./<name>
 ```
 
-## 8. Verify before reporting completion
+## 8. Keep versioning authoritative
 
-Never start containers, run generated workloads, or otherwise execute a Compose stack on the user's host. Verification must remain static and isolated; `docker compose config` is allowed because it only parses and renders configuration.
+Pinned image tags in `files/compose.yaml` are the application-version source of truth. Do not recreate per-template version metadata; Renovate updates the image references directly.
+
+Copier versions this repository as a whole, not each stack independently. Release tags must be PEP 440-compatible, such as `v1.0.0`, so generated projects can resolve and record a stable `_commit` in `.copier-answers.yml`. All eight selectors share that release stream. Do not create or push a repository tag unless the user explicitly asks.
+
+When changing an image tag manually, verify it against the application's official release source and run the full template check. An image update alone does not require a Copier migration; reserve `_migrations` for destination transformations that normal Copier updates cannot express.
+
+## 9. Verify before reporting completion
+
+Never start containers or execute generated workloads. `docker compose config` is allowed because it only parses configuration.
 
 At minimum:
 
-1. Parse `template.json` as JSON.
-2. Confirm the directory, `slug`, `metadata.name`, version metadata, and image tag agree.
-3. Confirm every `<< variable >>` used by generated files is declared in `template.json`.
-4. Generate the template into a temporary directory with `boilerplates compose generate` when the CLI is available.
-5. Exercise each meaningful conditional branch that the template provides, such as:
-   - direct ports and Traefik,
-   - HTTP and TLS routing,
-   - `local`, `mount`, and `nfs` storage,
-   - bundled and external dependencies.
-6. Run `docker compose -f <generated>/compose.yaml config` for each generated Compose file when Docker Compose is available.
-7. Reject output containing unresolved `<<`, `<%`, or `<#` delimiters.
-8. Run `git diff --check` and inspect the final diff for unrelated changes.
+1. Run `scripts/check-copier-templates.sh`.
+2. Confirm every payload variable is declared once in root `copier.yml` or the template fragment.
+3. Exercise meaningful conditional branches such as direct ports, proxy routing, TLS, storage modes, and bundled versus external dependencies.
+4. Reject unresolved `<<`, `<%`, `<#`, or `__COPIER_` markers.
+5. Run `docker compose config --quiet` against generated Compose files.
+6. Run `git diff --check` and inspect the final diff for unrelated changes.
 
 If a required tool is unavailable, run the remaining checks and state exactly what was skipped.
 
-## 9. Stop at the implementation boundary
+## 10. Stop at the implementation boundary
 
-Report:
-
-- whether the original library contained the tool,
-- the official source used,
-- the pinned version,
-- files created or changed,
-- verification performed and anything skipped.
-
-Do not commit or push unless the user explicitly asks. Never add co-author trailers.
+Report the upstream and official sources used, pinned image version, files changed, verification performed, and anything skipped. Do not commit or push unless explicitly asked. Never add co-author trailers.

@@ -1,0 +1,24 @@
+app_url:
+  type: str
+  help: Public URL used by TinyAuth for redirects and cookies. Use the Traefik URL when reverse-proxied.
+  default: http://localhost:3000
+  placeholder: https://auth.home.arpa
+  when: << template == 'r-tinyauth' >>
+auth_users:
+  type: str
+  help: Comma-separated username:bcrypt-hash entries. Generate a bcrypt hash with TinyAuth's password utility or bcrypt tooling.
+  default: ''
+  placeholder: admin:$2a$10$...
+  secret: true
+  when: << template == 'r-tinyauth' >>
+trusted_proxies:
+  type: str
+  help: Comma-separated proxy IPs or CIDRs allowed to provide forwarded client headers.
+  default: 172.17.0.0/16
+  placeholder: 172.17.0.0/16
+  when: << template == 'r-tinyauth' >>
+secure_cookie:
+  type: bool
+  help: Set secure cookies; keep enabled when TinyAuth is served over HTTPS.
+  default: true
+  when: << template == 'r-tinyauth' >>

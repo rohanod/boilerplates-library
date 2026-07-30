@@ -1,77 +1,77 @@
-Personal **Boilerplates** template library for homelab and self-hosted infrastructure.
+Personal [Copier](https://github.com/copier-org/copier) template library for homelab and self-hosted Docker Compose stacks.
 
 Original collection: [ChristianLempa/boilerplates-library](https://github.com/ChristianLempa/boilerplates-library)
 
 ## Templates
 
-| Kind | Template | Version | Description |
-| --- | --- | --- | --- |
-| `compose` | `r-bambuddy` | `0.2.4.9` | Print-farm management for Bambu Lab printers |
-| `compose` | `r-changedetection` | `0.55.8` | Website change detection and notifications |
-| `compose` | `r-cloudflared-web` | `2026.7.2` | Cloudflared tunnel client with a web management interface |
-| `compose` | `r-infisical` | `v0.162.7` | Secrets management with PostgreSQL and Redis |
-| `compose` | `r-karakeep` | `0.32.0` | Bookmark archiving, full-text search, and optional AI tagging |
-| `compose` | `r-nginxproxymanager` | `2.15.1` | Reverse proxy UI with SSL certificates |
-| `compose` | `r-spoolman` | `0.24.0` | Filament spool inventory and usage tracking |
-| `compose` | `r-tinyauth` | `v5.1.2` | Lightweight authentication gateway for protecting self-hosted applications |
+| Template | Description |
+| --- | --- |
+| `r-bambuddy` | Print-farm management for Bambu Lab printers |
+| `r-changedetection` | Website change detection and notifications |
+| `r-cloudflared-web` | Cloudflared tunnel client with a web management interface |
+| `r-infisical` | Secrets management with PostgreSQL and Redis |
+| `r-karakeep` | Bookmark archiving, full-text search, and optional AI tagging |
+| `r-nginxproxymanager` | Reverse proxy UI with SSL certificates |
+| `r-spoolman` | Filament spool inventory and usage tracking |
+| `r-tinyauth` | Lightweight authentication gateway for protecting self-hosted applications |
 
-## Use this library
+## Generate a stack
 
-Install the [Boilerplates CLI](https://github.com/christianlempa/boilerplates), then add this repo as a template library:
+Install Copier 9.17 or newer:
 
 ```bash
-# Run this outside the managed library directory. Removing a library deletes its checkout.
-cd ~
+brew install copier
+# or: uv tool install copier
+```
 
-# Add this repository as a root-layout Git library.
-boilerplates repo add rohan \
-  --type git \
-  --url https://github.com/rohanod/boilerplates-library.git \
-  --branch main \
-  --directory . \
-  --enabled \
-  --sync
+Select a template interactively:
 
-# Refresh libraries later.
-boilerplates repo update rohan
+```bash
+copier copy --trust \
+  gh:rohanod/boilerplates-library \
+  ./generated-stack
+```
 
-# List compose templates from this library
-boilerplates compose list
+Select the template up front and answer its remaining questions:
 
-# Generate a template (interactive)
-boilerplates compose generate TEMPLATE
-
-# Generate into a directory with overrides
-boilerplates compose generate TEMPLATE --output ./out \
-  --var service_name=TEMPLATE \
-  --no-interactive
+```bash
+copier copy --trust \
+  -d template=r-karakeep \
+  gh:rohanod/boilerplates-library \
+  ./karakeep
 ```
 
 Examples:
 
 ```bash
-boilerplates compose generate r-bambuddy --output ./bambuddy
-boilerplates compose generate r-changedetection --output ./changedetection
-boilerplates compose generate r-cloudflared-web --output ./cloudflared-web
-boilerplates compose generate r-infisical --output ./infisical
-boilerplates compose generate r-karakeep --output ./karakeep
-boilerplates compose generate r-nginxproxymanager --output ./nginxproxymanager
-boilerplates compose generate r-spoolman --output ./spoolman
-boilerplates compose generate r-tinyauth --output ./tinyauth
+copier copy --trust -d template=r-bambuddy gh:rohanod/boilerplates-library ./bambuddy
+copier copy --trust -d template=r-changedetection gh:rohanod/boilerplates-library ./changedetection
+copier copy --trust -d template=r-cloudflared-web gh:rohanod/boilerplates-library ./cloudflared-web
+copier copy --trust -d template=r-infisical gh:rohanod/boilerplates-library ./infisical
+copier copy --trust -d template=r-karakeep gh:rohanod/boilerplates-library ./karakeep
+copier copy --trust -d template=r-nginxproxymanager gh:rohanod/boilerplates-library ./nginxproxymanager
+copier copy --trust -d template=r-spoolman gh:rohanod/boilerplates-library ./spoolman
+copier copy --trust -d template=r-tinyauth gh:rohanod/boilerplates-library ./tinyauth
 ```
 
-## Update template versions
+`--trust` allows the template's local task to generate missing credentials with OpenSSL. Generated `.env` files are added to `.gitignore` and preserved by later Copier operations. User-supplied credentials are masked and omitted from `.copier-answers.yml`.
 
-Detect the latest GitHub release and confirm before applying it:
+## Updates
+
+Generated projects record their source, template selection, and non-secret answers in `.copier-answers.yml`. Once this repository publishes PEP 440-compatible tags such as `v1.0.0`, a clean generated Git repository can update with:
 
 ```bash
-node scripts/update-template-version.mjs r-karakeep
+copier update --trust
 ```
 
-Or supply the newest version manually:
+This repository migration does not migrate projects previously generated by the Boilerplates CLI. That one-time downstream migration is a separate follow-up.
+
+## Development
+
+Render and statically validate every template without starting containers:
 
 ```bash
-node scripts/update-template-version.mjs r-karakeep 0.33.0
+scripts/check-copier-templates.sh
 ```
 
 ## License
