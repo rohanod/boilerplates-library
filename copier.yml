@@ -189,7 +189,7 @@ metrics_enabled:
 volume_mode:
   type: str
   help: Choose where this stack keeps persistent data.
-  default: local
+  default: mount
   choices:
     Docker-managed named volumes: local
     Host bind mounts: mount

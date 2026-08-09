@@ -18,7 +18,7 @@ templates=(
 
 for template in "${templates[@]}"; do
   output="$temporary/$template"
-  copier copy --quiet --trust --defaults \
+  copier copy --quiet --trust --defaults --vcs-ref=HEAD \
     -d "template=$template" \
     "$root" \
     "$output" >/dev/null
@@ -69,7 +69,7 @@ validate_variant() {
   shift
   local output="$temporary/$name"
 
-  copier copy --quiet --trust --defaults "$@" "$root" "$output" >/dev/null
+  copier copy --quiet --trust --defaults --vcs-ref=HEAD "$@" "$root" "$output" >/dev/null
   ! rg -q '__COPIER_|<<|<%|<#' "$output" --hidden
   docker compose --project-directory "$output" -f "$output/compose.yaml" config --quiet
 }
