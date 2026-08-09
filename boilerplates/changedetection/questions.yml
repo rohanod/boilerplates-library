@@ -3,4 +3,4 @@ base_url:
   help: Public URL used in notification links. Use your Traefik host when reverse-proxied.
   default: http://localhost:5000
   placeholder: https://changedetection.home.arpa
-  when: << template == 'r-changedetection' >>
+  when: << template == 'changedetection' >>

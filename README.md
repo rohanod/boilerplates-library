@@ -6,14 +6,14 @@ Original collection: [ChristianLempa/boilerplates-library](https://github.com/Ch
 
 | Template | Description |
 | --- | --- |
-| `r-bambuddy` | Print-farm management for Bambu Lab printers |
-| `r-changedetection` | Website change detection and notifications |
-| `r-cloudflared-web` | Cloudflared tunnel client with a web management interface |
-| `r-infisical` | Secrets management with PostgreSQL and Redis |
-| `r-karakeep` | Bookmark archiving, full-text search, and optional AI tagging |
-| `r-nginxproxymanager` | Reverse proxy UI with SSL certificates |
-| `r-spoolman` | Filament spool inventory and usage tracking |
-| `r-tinyauth` | Lightweight authentication gateway for protecting self-hosted applications |
+| `bambuddy` | Print-farm management for Bambu Lab printers |
+| `changedetection` | Website change detection and notifications |
+| `cloudflared-web` | Cloudflared tunnel client with a web management interface |
+| `infisical` | Secrets management with PostgreSQL and Redis |
+| `karakeep` | Bookmark archiving, full-text search, and optional AI tagging |
+| `nginxproxymanager` | Reverse proxy UI with SSL certificates |
+| `spoolman` | Filament spool inventory and usage tracking |
+| `tinyauth` | Lightweight authentication gateway for protecting self-hosted applications |
 
 ## Generate a stack
 
@@ -36,7 +36,7 @@ Select the template up front and answer its remaining questions:
 
 ```bash
 copier copy --trust \
-  -d template=r-karakeep \
+  -d template=karakeep \
   gh:rohanod/boilerplates-library \
   ./karakeep
 ```
@@ -44,14 +44,14 @@ copier copy --trust \
 Examples:
 
 ```bash
-copier copy --trust -d template=r-bambuddy gh:rohanod/boilerplates-library ./bambuddy
-copier copy --trust -d template=r-changedetection gh:rohanod/boilerplates-library ./changedetection
-copier copy --trust -d template=r-cloudflared-web gh:rohanod/boilerplates-library ./cloudflared-web
-copier copy --trust -d template=r-infisical gh:rohanod/boilerplates-library ./infisical
-copier copy --trust -d template=r-karakeep gh:rohanod/boilerplates-library ./karakeep
-copier copy --trust -d template=r-nginxproxymanager gh:rohanod/boilerplates-library ./nginxproxymanager
-copier copy --trust -d template=r-spoolman gh:rohanod/boilerplates-library ./spoolman
-copier copy --trust -d template=r-tinyauth gh:rohanod/boilerplates-library ./tinyauth
+copier copy --trust -d template=bambuddy gh:rohanod/boilerplates-library ./bambuddy
+copier copy --trust -d template=changedetection gh:rohanod/boilerplates-library ./changedetection
+copier copy --trust -d template=cloudflared-web gh:rohanod/boilerplates-library ./cloudflared-web
+copier copy --trust -d template=infisical gh:rohanod/boilerplates-library ./infisical
+copier copy --trust -d template=karakeep gh:rohanod/boilerplates-library ./karakeep
+copier copy --trust -d template=nginxproxymanager gh:rohanod/boilerplates-library ./nginxproxymanager
+copier copy --trust -d template=spoolman gh:rohanod/boilerplates-library ./spoolman
+copier copy --trust -d template=tinyauth gh:rohanod/boilerplates-library ./tinyauth
 ```
 
 `--trust` allows the template's local task to generate missing credentials with OpenSSL. Generated `.env` files are added to `.gitignore` and preserved by later Copier operations. User-supplied credentials are masked and omitted from `.copier-answers.yml`.

@@ -37,9 +37,9 @@ Prefer the application's simplest supported homelab deployment. Do not add a dat
 
 Inspect existing templates before writing:
 
-- `compose/r-changedetection/` for a simple single-service app,
-- `compose/r-infisical/` for an app with supporting services, secrets, and `.env`,
-- `compose/r-nginxproxymanager/` for multiple ports and persistent paths.
+- `boilerplates/changedetection/` for a simple single-service app,
+- `boilerplates/infisical/` for an app with supporting services, secrets, and `.env`,
+- `boilerplates/nginxproxymanager/` for multiple ports and persistent paths.
 
 Reuse existing root questions and payload syntax instead of inventing new conventions.
 
@@ -48,7 +48,7 @@ Reuse existing root questions and payload syntax instead of inventing new conven
 Use this layout:
 
 ```text
-compose/r-<name>/
+boilerplates/<name>/
 ├── questions.yml
 └── files/
     ├── .copier-answers.yml
@@ -56,9 +56,9 @@ compose/r-<name>/
     └── .env                 # only when needed
 ```
 
-Add `r-<name>` to the root `template` choices and add a root `!include` for the new `questions.yml`. Never add a nested `copier.yml`.
+Add `<name>` to the root `template` choices and add a root `!include` for the new `questions.yml`. Never add a nested `copier.yml`.
 
-Keep shared question names in root `copier.yml`. Put only unique questions in the fragment, and include `template == 'r-<name>'` in every `when` condition. Controller questions must appear before questions whose `when` or default references them.
+Keep shared question names in root `copier.yml`. Put only unique questions in the fragment, and include `template == '<name>'` in every `when` condition. Controller questions must appear before questions whose `when` or default references them.
 
 Use the repository delimiters:
 
@@ -83,7 +83,7 @@ User-supplied credentials use `type: str` and `secret: true`. For automatically 
 Add the template to the table and add a Copier example:
 
 ```bash
-copier copy --trust -d template=r-<name> gh:rohanod/boilerplates-library ./<name>
+copier copy --trust -d template=<name> gh:rohanod/boilerplates-library ./<name>
 ```
 
 ## 8. Keep versioning authoritative

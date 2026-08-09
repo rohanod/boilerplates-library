@@ -6,14 +6,14 @@ temporary="$(mktemp -d "${TMPDIR:-/tmp}/copier-templates.XXXXXX")"
 trap '/bin/rm -rf "$temporary"' EXIT
 
 templates=(
-  r-bambuddy
-  r-changedetection
-  r-cloudflared-web
-  r-infisical
-  r-karakeep
-  r-nginxproxymanager
-  r-spoolman
-  r-tinyauth
+  bambuddy
+  changedetection
+  cloudflared-web
+  infisical
+  karakeep
+  nginxproxymanager
+  spoolman
+  tinyauth
 )
 
 for template in "${templates[@]}"; do
@@ -38,16 +38,16 @@ for template in "${templates[@]}"; do
   fi
 
   case "$template" in
-    r-cloudflared-web)
+    cloudflared-web)
       grep -Eq "^BASIC_AUTH_PASS='[^']+'$" "$output/.env"
       ;;
-    r-infisical)
+    infisical)
       grep -Eq "^ENCRYPTION_KEY='[^']+'$" "$output/.env"
       grep -Eq "^AUTH_SECRET='[^']+'$" "$output/.env"
       grep -Eq "^POSTGRES_PASSWORD='[^']+'$" "$output/.env"
       grep -Eq "^REDIS_PASSWORD='[^']+'$" "$output/.env"
       ;;
-    r-karakeep)
+    karakeep)
       grep -Eq "^NEXTAUTH_SECRET='[^']+'$" "$output/.env"
       grep -Eq "^MEILI_MASTER_KEY='[^']+'$" "$output/.env"
       ;;
@@ -75,19 +75,19 @@ validate_variant() {
 }
 
 validate_variant changedetection-traefik-nfs \
-  -d template=r-changedetection \
+  -d template=changedetection \
   -d traefik_enabled=true \
   -d traefik_tls_enabled=true \
   -d volume_mode=nfs
 
 validate_variant bambuddy-bridge \
-  -d template=r-bambuddy \
+  -d template=bambuddy \
   -d network_mode=bridge \
   -d npm_proxy_enabled=true \
   -d virtual_printer_enabled=true
 
 validate_variant infisical-external \
-  -d template=r-infisical \
+  -d template=infisical \
   -d database_external=true \
   -d database_connection_uri=postgresql://user:password@database:5432/infisical \
   -d redis_external=true \
@@ -97,14 +97,20 @@ validate_variant infisical-external \
   -d email_password=test-password
 
 validate_variant karakeep-ollama \
-  -d template=r-karakeep \
+  -d template=karakeep \
   -d ai_provider=ollama
 
 validate_variant spoolman-postgresql \
-  -d template=r-spoolman \
+  -d template=spoolman \
   -d database_type=postgresql \
   -d database_host=database \
   -d database_password=test-password
 
+validate_variant changedetection-mount \
+  -d template=changedetection \
+  -d volume_mode=mount
+
+grep -q '../data/changedetection/datastore:/datastore' "$temporary/changedetection-mount/compose.yaml"
+
 git -C "$root" diff --check
-printf 'Validated %s default templates and 5 conditional variants.\n' "${#templates[@]}"
+printf 'Validated %s default templates and 6 conditional variants.\n' "${#templates[@]}"

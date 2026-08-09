@@ -2,16 +2,16 @@ disable_ipv6:
   type: bool
   help: Set DISABLE_IPV6 when the Docker host has no IPv6.
   default: true
-  when: << template == 'r-nginxproxymanager' >>
+  when: << template == 'nginxproxymanager' >>
 ports_https:
   type: str
   help: Host port for proxied HTTPS.
   default: '443'
   placeholder: '443'
-  when: << template == 'r-nginxproxymanager' >>
+  when: << template == 'nginxproxymanager' >>
 ports_admin:
   type: str
   help: Host port for the admin UI. Always published; Traefik can also route to it when enabled.
   default: '81'
   placeholder: '81'
-  when: << template == 'r-nginxproxymanager' >>
+  when: << template == 'nginxproxymanager' >>

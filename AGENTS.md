@@ -23,7 +23,7 @@ This repository is one Copier template with a root selector. Do not add nested `
 Each stack uses this layout:
 
 ```text
-compose/r-<name>/
+boilerplates/<name>/
 ├── questions.yml
 └── files/
     ├── .copier-answers.yml
@@ -31,7 +31,7 @@ compose/r-<name>/
     └── .env                 # only when needed
 ```
 
-Prefix every template directory and selector value with `r-` (for example `compose/r-infisical` and `r-infisical`). Add new selector values and shared questions to the root `copier.yml`. Keep only template-specific questions in `questions.yml`, and guard each with `template == 'r-<name>'`.
+Use the plain template name for the directory and selector value (for example `boilerplates/infisical` and `infisical`). Add new selector values and shared questions to the root `copier.yml`. Keep only template-specific questions in `questions.yml`, and guard each with `template == '<name>'`.
 
 Reuse an existing root question instead of redefining a common name in a fragment. Keep the existing Copier delimiters: `<< >>`, `<% %>`, and `<# #>`.
 

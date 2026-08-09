@@ -3,30 +3,30 @@ webui_host:
   help: Host address used by the web UI. The container uses host networking.
   default: 0.0.0.0
   placeholder: 0.0.0.0
-  when: << template == 'r-cloudflared-web' >>
+  when: << template == 'cloudflared-web' >>
 webui_port:
   type: int
   help: Host port used by the web UI because the container uses host networking.
   default: 14333
   placeholder: '14333'
-  when: << template == 'r-cloudflared-web' >>
+  when: << template == 'cloudflared-web' >>
 basic_auth_enabled:
   type: bool
   help: Protect the web UI with HTTP Basic Authentication. Recommended when binding beyond localhost.
   default: true
-  when: << template == 'r-cloudflared-web' >>
+  when: << template == 'cloudflared-web' >>
 basic_auth_user:
   type: str
   help: Basic Auth Username
   default: admin
   placeholder: admin
-  when: << template == 'r-cloudflared-web' and basic_auth_enabled >>
+  when: << template == 'cloudflared-web' and basic_auth_enabled >>
 edge_bind_address:
   type: str
   help: Optional source IP address used for connections to Cloudflare. Its IP version overrides Edge IP Version.
   default: ''
   placeholder: 192.0.2.10
-  when: << template == 'r-cloudflared-web' >>
+  when: << template == 'cloudflared-web' >>
 edge_ip_version:
   type: str
   help: Edge IP Version
@@ -35,7 +35,7 @@ edge_ip_version:
   - auto
   - '4'
   - '6'
-  when: << template == 'r-cloudflared-web' >>
+  when: << template == 'cloudflared-web' >>
 protocol:
   type: str
   help: Tunnel Protocol
@@ -44,13 +44,13 @@ protocol:
   - auto
   - http2
   - quic
-  when: << template == 'r-cloudflared-web' >>
+  when: << template == 'cloudflared-web' >>
 grace_period:
   type: str
   help: Maximum graceful shutdown period for in-progress requests.
   default: 30s
   placeholder: 30s
-  when: << template == 'r-cloudflared-web' >>
+  when: << template == 'cloudflared-web' >>
 region:
   type: str
   help: Use global routing or restrict connections to the United States.
@@ -58,16 +58,16 @@ region:
   choices:
   - global
   - us
-  when: << template == 'r-cloudflared-web' >>
+  when: << template == 'cloudflared-web' >>
 retries:
   type: int
   help: Maximum connection or protocol retries. High values are not recommended.
   default: 5
   placeholder: '5'
-  when: << template == 'r-cloudflared-web' >>
+  when: << template == 'cloudflared-web' >>
 metrics_port:
   type: int
   help: Host metrics port because the container uses host networking.
   default: 60123
   placeholder: '60123'
-  when: << template == 'r-cloudflared-web' and metrics_enabled >>
+  when: << template == 'cloudflared-web' and metrics_enabled >>
