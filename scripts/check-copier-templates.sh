@@ -16,6 +16,9 @@ templates=(
   tinyauth
 )
 
+grep -q 'Attach Nginx Proxy Manager to the existing external npm-proxy network' "$root/copier.yml"
+! grep -q 'Attach BamBuddy to the existing external npm-proxy network' "$root/copier.yml"
+
 for template in "${templates[@]}"; do
   output="$temporary/$template"
   copier copy --quiet --trust --defaults --vcs-ref=HEAD \

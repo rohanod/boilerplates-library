@@ -131,7 +131,10 @@ traefik_enabled:
   when: << (template == 'changedetection') or (template == 'infisical') or (template == 'karakeep') or (template == 'nginxproxymanager') or (template == 'spoolman') or (template == 'tinyauth') >>
 npm_proxy_enabled:
   type: bool
-  help: Attach BamBuddy to the existing external npm-proxy network and suppress only the Web UI host port. Virtual-printer ports remain published. In Nginx Proxy Manager, use hostname bambuddy-web and the configured application port.
+  help: >-
+    << 'Attach Nginx Proxy Manager to the existing external npm-proxy network so it can reach proxied containers.'
+       if template == 'nginxproxymanager'
+       else 'Attach this container to the existing external npm-proxy network and suppress only its Web UI host port.' >>
   default: false
   when: << (template == 'bambuddy' and network_mode == 'bridge') or (template == 'changedetection') or (template == 'infisical') or (template == 'karakeep') or (template == 'nginxproxymanager') or (template == 'spoolman') or (template == 'tinyauth') >>
 ports_http:
