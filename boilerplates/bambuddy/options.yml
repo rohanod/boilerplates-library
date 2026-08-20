@@ -1,0 +1,115 @@
+stop_grace_period:
+  type: str
+  help: Time allowed for a graceful shutdown.
+  default: 30s
+  placeholder: 30s
+  when: << template == 'bambuddy' and configure_optional and 'runtime' in optional_groups >>
+
+debug_enabled:
+  type: bool
+  help: Enable verbose debug behavior.
+  default: false
+  when: << template == 'bambuddy' and configure_optional and 'runtime' in optional_groups >>
+
+application_port:
+  type: int
+  help: Port BamBuddy listens on. In host mode this is also the host port.
+  default: 8000
+  when: << template == 'bambuddy' and configure_optional and 'runtime' in optional_groups >>
+
+ports_web:
+  type: str
+  help: Direct Web UI host port in bridge mode without NPM proxying.
+  default: '8000'
+  placeholder: '8000'
+  when: << template == 'bambuddy' and configure_optional and 'runtime' in optional_groups and network_mode == 'bridge' and not npm_proxy_enabled >>
+
+virtual_printer_enabled:
+  type: bool
+  help: Publish the official virtual-printer port set for up to three virtual printers.
+  default: false
+  when: << template == 'bambuddy' and configure_optional and 'runtime' in optional_groups and network_mode == 'bridge' >>
+
+virtual_printer_pasv_address:
+  type: str
+  help: LAN IP of the Docker host advertised to FTP clients.
+  default: 192.168.1.100
+  placeholder: 192.168.1.100
+  when: << template == 'bambuddy' and configure_optional and 'runtime' in optional_groups and network_mode == 'bridge' and virtual_printer_enabled >>
+
+home_assistant_enabled:
+  type: bool
+  help: Connect BamBuddy to Home Assistant.
+  default: false
+  when: << template == 'bambuddy' and configure_optional and 'home_assistant' in optional_groups >>
+
+home_assistant_url:
+  type: str
+  help: Home Assistant base URL.
+  default: http://homeassistant.local:8123
+  placeholder: https://homeassistant.example.com
+  when: << template == 'bambuddy' and home_assistant_enabled >>
+
+home_assistant_token:
+  type: str
+  help: Home Assistant long-lived access token.
+  default: ''
+  secret: true
+  when: << template == 'bambuddy' and home_assistant_enabled >>
+  validator: <% if not home_assistant_token | trim %>Home Assistant token is required.<% endif %>
+
+trusted_frame_origins:
+  type: str
+  help: Comma-separated exact origins allowed to embed BamBuddy.
+  default: ''
+  placeholder: https://homeassistant.example.com
+  when: << template == 'bambuddy' and configure_optional and 'home_assistant' in optional_groups >>
+
+external_database_enabled:
+  type: bool
+  help: Use an existing PostgreSQL server instead of SQLite.
+  default: false
+  when: << template == 'bambuddy' and configure_optional and 'database' in optional_groups >>
+
+database_url:
+  type: str
+  help: SQLAlchemy PostgreSQL URL.
+  default: ''
+  placeholder: postgresql+asyncpg://user:password@host:5432/bambuddy
+  secret: true
+  when: << template == 'bambuddy' and external_database_enabled >>
+  validator: <% if not database_url | trim %>Database URL is required.<% endif %>
+
+slicer_api_url:
+  type: str
+  help: URL of a separately deployed OrcaSlicer API service.
+  default: ''
+  placeholder: http://192.168.1.100:3003
+  when: << template == 'bambuddy' and configure_optional and 'slicer' in optional_groups >>
+
+external_libraries:
+  type: yaml
+  multiline: true
+  help: 'List read-only libraries as YAML objects with host_path and container_path keys.'
+  default: []
+  when: << template == 'bambuddy' and configure_optional and 'libraries' in optional_groups >>
+
+private_ca_enabled:
+  type: bool
+  help: Trust additional CA certificates mounted from the host.
+  default: false
+  when: << template == 'bambuddy' and configure_optional and 'certificates_backups' in optional_groups >>
+
+private_ca_host_path:
+  type: str
+  help: Host directory containing PEM or CRT CA certificates.
+  default: /etc/ssl/local-certs
+  placeholder: /etc/ssl/local-certs
+  when: << template == 'bambuddy' and private_ca_enabled >>
+
+backup_host_path:
+  type: str
+  help: Optional dedicated host directory mounted at /app/data/backups.
+  default: ''
+  placeholder: /mnt/backups/bambuddy
+  when: << template == 'bambuddy' and configure_optional and 'certificates_backups' in optional_groups >>

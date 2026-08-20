@@ -1,0 +1,127 @@
+ports_https:
+  type: str
+  help: Host port for proxied HTTPS.
+  default: '443'
+  when: << template == 'nginxproxymanager' and configure_optional and 'network_behavior' in optional_groups >>
+
+ports_admin:
+  type: str
+  help: Host port for the Nginx Proxy Manager admin UI.
+  default: '81'
+  when: << template == 'nginxproxymanager' and configure_optional and 'network_behavior' in optional_groups >>
+
+disable_ipv6:
+  type: bool
+  help: Disable IPv6 when the Docker host does not support it.
+  default: true
+  when: << template == 'nginxproxymanager' and configure_optional and 'network_behavior' in optional_groups >>
+
+npm_database_type:
+  type: str
+  help: Database used by Nginx Proxy Manager.
+  default: sqlite
+  choices:
+    Bundled SQLite database: sqlite
+    Existing MySQL or MariaDB: mysql
+    Existing PostgreSQL: postgres
+  when: << template == 'nginxproxymanager' and configure_optional and 'database' in optional_groups >>
+
+npm_database_host:
+  type: str
+  help: External database host.
+  default: ''
+  when: << template == 'nginxproxymanager' and npm_database_type != 'sqlite' >>
+  validator: <% if not npm_database_host | trim %>Database host is required.<% endif %>
+
+npm_database_port:
+  type: int
+  help: External database port.
+  default: "<< 3306 if npm_database_type == 'mysql' else 5432 >>"
+  when: << template == 'nginxproxymanager' and npm_database_type != 'sqlite' >>
+
+npm_database_user:
+  type: str
+  help: External database user.
+  default: npm
+  when: << template == 'nginxproxymanager' and npm_database_type != 'sqlite' >>
+
+npm_database_password:
+  type: str
+  help: External database password.
+  default: ''
+  secret: true
+  when: << template == 'nginxproxymanager' and npm_database_type != 'sqlite' >>
+  validator: <% if not npm_database_password | trim %>Database password is required.<% endif %>
+
+npm_database_name:
+  type: str
+  help: External database name.
+  default: npm
+  when: << template == 'nginxproxymanager' and npm_database_type != 'sqlite' >>
+
+npm_mysql_ssl:
+  type: bool
+  help: Use TLS for MySQL or MariaDB.
+  default: false
+  when: << template == 'nginxproxymanager' and npm_database_type == 'mysql' >>
+
+npm_mysql_ssl_reject_unauthorized:
+  type: bool
+  help: Reject untrusted MySQL TLS certificates.
+  default: true
+  when: << template == 'nginxproxymanager' and npm_database_type == 'mysql' and npm_mysql_ssl >>
+
+npm_mysql_ssl_verify_identity:
+  type: bool
+  help: Verify the MySQL server hostname.
+  default: true
+  when: << template == 'nginxproxymanager' and npm_database_type == 'mysql' and npm_mysql_ssl >>
+
+initial_admin_enabled:
+  type: bool
+  help: Provision the initial administrator from environment variables.
+  default: false
+  when: << template == 'nginxproxymanager' and configure_optional and 'initial_admin' in optional_groups >>
+
+initial_admin_email:
+  type: str
+  help: Initial administrator email address.
+  default: ''
+  when: << template == 'nginxproxymanager' and initial_admin_enabled >>
+  validator: <% if not initial_admin_email | trim %>Initial administrator email is required.<% endif %>
+
+initial_admin_password:
+  type: str
+  help: Initial administrator password.
+  default: ''
+  secret: true
+  when: << template == 'nginxproxymanager' and initial_admin_enabled >>
+  validator: <% if not initial_admin_password | trim %>Initial administrator password is required.<% endif %>
+
+ip_ranges_fetch_enabled:
+  type: bool
+  help: Fetch Cloudflare and CloudFront IP ranges.
+  default: true
+  when: << template == 'nginxproxymanager' and configure_optional and 'network_behavior' in optional_groups >>
+
+disable_resolver:
+  type: bool
+  help: Disable generated Nginx resolver directives.
+  default: false
+  when: << template == 'nginxproxymanager' and configure_optional and 'network_behavior' in optional_groups >>
+
+x_frame_options:
+  type: str
+  help: X-Frame-Options policy for the admin UI.
+  default: deny
+  choices:
+    Deny embedding: deny
+    Allow same-origin embedding: sameorigin
+  when: << template == 'nginxproxymanager' and configure_optional and 'network_behavior' in optional_groups >>
+
+custom_config_host_path:
+  type: str
+  help: Optional host directory containing Nginx custom snippets.
+  default: ''
+  placeholder: ../data/nginxproxymanager/custom
+  when: << template == 'nginxproxymanager' and configure_optional and 'custom_config' in optional_groups >>

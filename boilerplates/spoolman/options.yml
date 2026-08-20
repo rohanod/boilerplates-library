@@ -1,0 +1,90 @@
+database_host:
+  type: str
+  help: Database host.
+  default: ''
+  when: << template == 'spoolman' and database_type != 'sqlite' >>
+  validator: <% if not database_host | trim %>Database host is required.<% endif %>
+
+database_port:
+  type: int
+  help: Database port.
+  default: "<< {'mysql': 3306, 'postgres': 5432, 'cockroachdb': 26257}.get(database_type, 5432) >>"
+  when: << template == 'spoolman' and database_type != 'sqlite' >>
+
+database_username:
+  type: str
+  help: Database username.
+  default: spoolman
+  when: << template == 'spoolman' and database_type != 'sqlite' >>
+
+database_password:
+  type: str
+  help: Database password.
+  default: ''
+  secret: true
+  when: << template == 'spoolman' and database_type != 'sqlite' >>
+  validator: <% if not database_password | trim %>Database password is required.<% endif %>
+
+database_query:
+  type: str
+  help: Optional database connection query parameters.
+  default: ''
+  placeholder: ssl=true
+  when: << template == 'spoolman' and database_type != 'sqlite' >>
+
+base_path:
+  type: str
+  help: Optional URL subpath such as /spoolman.
+  default: ''
+  placeholder: /spoolman
+  when: << template == 'spoolman' and configure_optional and 'access' in optional_groups >>
+
+cors_origin:
+  type: str
+  help: Comma-separated allowed CORS origins.
+  default: ''
+  placeholder: https://printer.example.com
+  when: << template == 'spoolman' and configure_optional and 'access' in optional_groups >>
+
+allowed_hosts:
+  type: str
+  help: Comma-separated allowed Host header names without schemes or ports.
+  default: ''
+  placeholder: spoolman.example.com
+  when: << template == 'spoolman' and configure_optional and 'access' in optional_groups >>
+
+logging_level:
+  type: str
+  help: Logging level.
+  default: INFO
+  choices:
+    - DEBUG
+    - INFO
+    - WARNING
+    - ERROR
+    - CRITICAL
+  when: << template == 'spoolman' and configure_optional and 'observability' in optional_groups >>
+
+external_db_url:
+  type: str
+  help: Source used to import filament data; leave empty to disable imports.
+  default: https://donkie.github.io/SpoolmanDB/
+  when: << template == 'spoolman' and configure_optional and 'catalog' in optional_groups >>
+
+external_db_name:
+  type: str
+  help: Display name for the external material catalog.
+  default: SpoolmanDB
+  when: << template == 'spoolman' and configure_optional and 'catalog' in optional_groups >>
+
+external_db_sync_interval:
+  type: int
+  help: Synchronization interval in seconds; use 0 to disable periodic synchronization.
+  default: 3600
+  when: << template == 'spoolman' and configure_optional and 'catalog' in optional_groups >>
+
+automatic_backup:
+  type: bool
+  help: Create nightly backups when using SQLite.
+  default: true
+  when: << template == 'spoolman' and configure_optional and 'backups' in optional_groups and database_type == 'sqlite' >>

@@ -9,7 +9,6 @@ Original collection: [ChristianLempa/boilerplates-library](https://github.com/Ch
 | `bambuddy` | Print-farm management for Bambu Lab printers |
 | `changedetection` | Website change detection and notifications |
 | `cloudflared-web` | Cloudflared tunnel client with a web management interface |
-| `infisical` | Secrets management with PostgreSQL and Redis |
 | `karakeep` | Bookmark archiving, full-text search, and optional AI tagging |
 | `nginxproxymanager` | Reverse proxy UI with SSL certificates |
 | `spoolman` | Filament spool inventory and usage tracking |
@@ -24,30 +23,36 @@ brew install copier
 # or: uv tool install copier
 ```
 
-Select a template interactively:
+Pass an explicit destination directory for the selected stack:
 
 ```bash
 copier copy --trust \
+  -d template=bambuddy \
   gh:rohanod/boilerplates-library \
-  ./generated-stack
+  ./bambuddy
 ```
 
-Select the template up front and answer its remaining questions:
+This creates `./bambuddy/compose.yaml`. With the default bind-mount answers, that Compose file contains `../data/bambuddy`; because Compose resolves relative host paths from the Compose file, the persistent data is stored at `./data/bambuddy` in the parent directory.
+
+After the required questions, Copier asks whether to configure optional settings. Select all desired groups in the single multiselect; unselected groups retain safe defaults. Applications can optionally join an existing Nginx Proxy Manager Docker network.
+
+When that group is selected, create the Proxy Host in Nginx Proxy Manager with the generated Docker alias and internal port:
+
+| Template | Forward hostname | Forward port |
+| --- | --- | ---: |
+| `bambuddy` (bridge mode) | `bambuddy-web` | `8000` or the configured application port |
+| `changedetection` | `changedetection-web` | `5000` |
+| `karakeep` | `karakeep-web` | `3000` |
+| `spoolman` | `spoolman-web` | `8000` |
+| `tinyauth` | `tinyauth-web` | `3000` |
+
+Nginx Proxy Manager can join the same external network while retaining its host mappings for ports 80, 443, and 81.
+
+Other templates use the same explicit destination pattern:
 
 ```bash
-copier copy --trust \
-  -d template=karakeep \
-  gh:rohanod/boilerplates-library \
-  ./karakeep
-```
-
-Examples:
-
-```bash
-copier copy --trust -d template=bambuddy gh:rohanod/boilerplates-library ./bambuddy
 copier copy --trust -d template=changedetection gh:rohanod/boilerplates-library ./changedetection
 copier copy --trust -d template=cloudflared-web gh:rohanod/boilerplates-library ./cloudflared-web
-copier copy --trust -d template=infisical gh:rohanod/boilerplates-library ./infisical
 copier copy --trust -d template=karakeep gh:rohanod/boilerplates-library ./karakeep
 copier copy --trust -d template=nginxproxymanager gh:rohanod/boilerplates-library ./nginxproxymanager
 copier copy --trust -d template=spoolman gh:rohanod/boilerplates-library ./spoolman
@@ -58,9 +63,10 @@ copier copy --trust -d template=tinyauth gh:rohanod/boilerplates-library ./tinya
 
 ## Updates
 
-Generated projects record their source, template selection, and non-secret answers in `.copier-answers.yml`. Once this repository publishes PEP 440-compatible tags such as `v1.0.0`, a clean generated Git repository can update with:
+Generated projects record their source, template selection, and non-secret answers in `.copier-answers.yml`. Run updates from inside the generated destination:
 
 ```bash
+cd bambuddy
 copier update --trust
 ```
 

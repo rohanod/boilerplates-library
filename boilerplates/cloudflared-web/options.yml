@@ -1,0 +1,78 @@
+webui_host:
+  type: str
+  help: Host address used by the Web UI; this container uses host networking.
+  default: 0.0.0.0
+  placeholder: 0.0.0.0
+  when: << template == 'cloudflared-web' and configure_optional and 'webui_auth' in optional_groups >>
+
+webui_port:
+  type: int
+  help: Host port used by the Web UI.
+  default: 14333
+  when: << template == 'cloudflared-web' and configure_optional and 'webui_auth' in optional_groups >>
+
+basic_auth_enabled:
+  type: bool
+  help: Protect the Web UI with generated HTTP Basic Authentication credentials.
+  default: true
+  when: << template == 'cloudflared-web' and configure_optional and 'webui_auth' in optional_groups >>
+
+basic_auth_user:
+  type: str
+  help: Basic Auth username.
+  default: admin
+  when: << template == 'cloudflared-web' and configure_optional and 'webui_auth' in optional_groups and basic_auth_enabled >>
+
+edge_bind_address:
+  type: str
+  help: Optional source IP for connections to Cloudflare.
+  default: ''
+  placeholder: 192.0.2.10
+  when: << template == 'cloudflared-web' and configure_optional and 'tunnel' in optional_groups >>
+
+edge_ip_version:
+  type: str
+  help: Cloudflare edge IP version.
+  default: auto
+  choices:
+    - auto
+    - '4'
+    - '6'
+  when: << template == 'cloudflared-web' and configure_optional and 'tunnel' in optional_groups >>
+
+protocol:
+  type: str
+  help: Tunnel protocol.
+  default: auto
+  choices:
+    - auto
+    - http2
+    - quic
+  when: << template == 'cloudflared-web' and configure_optional and 'tunnel' in optional_groups >>
+
+grace_period:
+  type: str
+  help: Maximum graceful shutdown period for in-progress requests.
+  default: 30s
+  when: << template == 'cloudflared-web' and configure_optional and 'tunnel' in optional_groups >>
+
+region:
+  type: str
+  help: Use global routing or restrict connections to the United States.
+  default: global
+  choices:
+    - global
+    - us
+  when: << template == 'cloudflared-web' and configure_optional and 'tunnel' in optional_groups >>
+
+retries:
+  type: int
+  help: Maximum connection or protocol retries.
+  default: 5
+  when: << template == 'cloudflared-web' and configure_optional and 'tunnel' in optional_groups >>
+
+metrics_port:
+  type: int
+  help: Host metrics port.
+  default: 60123
+  when: << template == 'cloudflared-web' and metrics_enabled >>

@@ -1,7 +1,7 @@
 ---
 name: create-compose-template
 description: Create or add a Docker Compose template in this repository. Use whenever a user asks for a new Compose workload, stack, service, app, or self-hosted tool template.
-version: 2.0.0
+version: 2.1.0
 ---
 
 # Create a Docker Compose Template
@@ -38,7 +38,7 @@ Prefer the application's simplest supported homelab deployment. Do not add a dat
 Inspect existing templates before writing:
 
 - `boilerplates/changedetection/` for a simple single-service app,
-- `boilerplates/infisical/` for an app with supporting services, secrets, and `.env`,
+- `boilerplates/karakeep/` for an app with supporting services, secrets, and `.env`,
 - `boilerplates/nginxproxymanager/` for multiple ports and persistent paths.
 
 Reuse existing root questions and payload syntax instead of inventing new conventions.
@@ -49,16 +49,17 @@ Use this layout:
 
 ```text
 boilerplates/<name>/
-├── questions.yml
+├── questions.yml            # required/core questions
+├── options.yml              # optional-group questions
 └── files/
     ├── .copier-answers.yml
     ├── compose.yaml
     └── .env                 # only when needed
 ```
 
-Add `<name>` to the root `template` choices and add a root `!include` for the new `questions.yml`. Never add a nested `copier.yml`.
+Add `<name>` to the root `template` choices. Include `questions.yml` with the required fragments before `configure_optional`, and include `options.yml` with the optional fragments after `optional_groups`. Never add a nested `copier.yml`.
 
-Keep shared question names in root `copier.yml`. Put only unique questions in the fragment, and include `template == '<name>'` in every `when` condition. Controller questions must appear before questions whose `when` or default references them.
+Keep shared question names in root `copier.yml`. Put only unique questions in the fragments, and include `template == '<name>'` in every `when` condition. Optional questions must also test their selected group. Controller questions must appear before questions whose `when` or default references them.
 
 Use the repository delimiters:
 
@@ -68,7 +69,9 @@ Use the repository delimiters:
 
 ## 6. Expose useful configuration
 
-Expose only application-supported choices used by the generated files. Reuse established questions for service names, restart policies, proxy integrations, ports, and storage.
+Expose only documented, routinely useful settings used by the generated files. Put required inputs first, then group optional settings by user intent. Omit debug-only, internal, dangerous, and unwieldy repeatable configuration.
+
+Nginx Proxy Manager is the reverse-proxy integration. A proxied Web service joins the configured external network with a stable alias and suppresses only its direct Web host port; Nginx Proxy Manager itself retains ports 80, 443, and 81.
 
 For persistent data, use `volume_mode` when it fits:
 
@@ -90,7 +93,7 @@ copier copy --trust -d template=<name> gh:rohanod/boilerplates-library ./<name>
 
 Pinned image tags in `files/compose.yaml` are the application-version source of truth. Do not recreate per-template version metadata; Renovate updates the image references directly.
 
-Copier versions this repository as a whole, not each stack independently. Release tags must be PEP 440-compatible, such as `v1.0.0`, so generated projects can resolve and record a stable `_commit` in `.copier-answers.yml`. All eight selectors share that release stream. Do not create or push a repository tag unless the user explicitly asks.
+Copier versions this repository as a whole, not each stack independently. Release tags must be PEP 440-compatible, such as `v1.0.0`, so generated projects can resolve and record a stable `_commit` in `.copier-answers.yml`. All selectors share that release stream. Do not create or push a repository tag unless the user explicitly asks.
 
 When changing an image tag manually, verify it against the application's official release source and run the full template check. An image update alone does not require a Copier migration; reserve `_migrations` for destination transformations that normal Copier updates cannot express.
 
@@ -102,7 +105,7 @@ At minimum:
 
 1. Run `scripts/check-copier-templates.sh`.
 2. Confirm every payload variable is declared once in root `copier.yml` or the template fragment.
-3. Exercise meaningful conditional branches such as direct ports, proxy routing, TLS, storage modes, and bundled versus external dependencies.
+3. Exercise meaningful conditional branches such as direct ports, Nginx Proxy Manager networking, optional groups, storage modes, and bundled versus external dependencies.
 4. Reject unresolved `<<`, `<%`, `<#`, or `__COPIER_` markers.
 5. Run `docker compose config --quiet` against generated Compose files.
 6. Run `git diff --check` and inspect the final diff for unrelated changes.

@@ -59,8 +59,11 @@ services:
       <%- if slicer_api_url %>
       - SLICER_API_URL=<< slicer_api_url >>
       <%- endif %>
-      <%- if external_library_enabled %>
-      - BAMBUDDY_EXTERNAL_ROOTS=<< external_library_container_path >>
+      <%- if external_libraries %>
+      - BAMBUDDY_EXTERNAL_ROOTS=<% for library in external_libraries %><< library.container_path >><% if not loop.last %>:<% endif %><% endfor %>
+      <%- endif %>
+      <%- if private_ca_enabled %>
+      - USE_SYSTEM_TRUST_STORE=true
       <%- endif %>
     volumes:
       <%- if volume_mode == 'mount' %>
@@ -70,8 +73,14 @@ services:
       - << service_name >>_data:/app/data
       - << service_name >>_logs:/app/logs
       <%- endif %>
-      <%- if external_library_enabled %>
-      - << external_library_host_path >>:<< external_library_container_path >>:ro
+      <%- for library in external_libraries %>
+      - << library.host_path >>:<< library.container_path >>:ro
+      <%- endfor %>
+      <%- if private_ca_enabled %>
+      - << private_ca_host_path >>:/usr/local/share/ca-certificates:ro
+      <%- endif %>
+      <%- if backup_host_path %>
+      - << backup_host_path >>:/app/data/backups
       <%- endif %>
 
 <%- if volume_mode == 'local' %>
@@ -100,5 +109,6 @@ volumes:
 networks:
   default:
   npm-proxy:
+    name: << npm_proxy_network >>
     external: true
 <%- endif %>
