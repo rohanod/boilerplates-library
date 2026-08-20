@@ -49,18 +49,12 @@ _tasks:
           cloudflared-web)
             replace_token __COPIER_BASIC_AUTH_PASSWORD__ "$(openssl rand -hex 12)"
             ;;
-          infisical)
-            replace_token __COPIER_INFISICAL_ENCRYPTION_KEY__ "$(openssl rand -hex 16)"
-            replace_token __COPIER_INFISICAL_AUTH_SECRET__ "$(openssl rand -base64 32 | tr -d '\n')"
-            replace_token __COPIER_POSTGRES_PASSWORD__ "$(openssl rand -hex 16)"
-            replace_token __COPIER_REDIS_PASSWORD__ "$(openssl rand -hex 16)"
-            ;;
           karakeep)
             replace_token __COPIER_NEXTAUTH_SECRET__ "$(openssl rand -base64 36 | tr -d '\n')"
             replace_token __COPIER_MEILI_MASTER_KEY__ "$(openssl rand -hex 24)"
             ;;
         esac
-    when: "<< _copier_operation == 'copy' and template in ['bambuddy', 'cloudflared-web', 'infisical', 'karakeep', 'spoolman', 'tinyauth'] >>"
+    when: << _copier_operation == 'copy' and template in ['bambuddy', 'changedetection', 'cloudflared-web', 'karakeep', 'nginxproxymanager', 'spoolman', 'tinyauth'] >>
 
 template:
   type: str
@@ -69,193 +63,76 @@ template:
     BamBuddy: bambuddy
     changedetection.io: changedetection
     Cloudflared Web: cloudflared-web
-    Infisical: infisical
     Karakeep: karakeep
     Nginx Proxy Manager: nginxproxymanager
     Spoolman: spoolman
     TinyAuth: tinyauth
+
 service_name:
   type: str
-  help: Service Name
-  default: '<< {''bambuddy'': ''bambuddy'', ''changedetection'': ''changedetection'', ''cloudflared-web'': ''cloudflared-web'', ''infisical'': '''', ''karakeep'': ''karakeep'', ''nginxproxymanager'': ''nginxproxymanager'', ''spoolman'': ''spoolman'', ''tinyauth'': ''tinyauth''}.get(template, '''') >>'
-  placeholder: '<< {''bambuddy'': ''bambuddy'', ''changedetection'': ''changedetection'', ''cloudflared-web'': ''cloudflared-web'', ''infisical'': ''infisical'', ''karakeep'': ''karakeep'', ''nginxproxymanager'': ''nginxproxymanager'', ''spoolman'': ''spoolman'', ''tinyauth'': ''tinyauth''}.get(template, '''') >>'
+  help: Docker Compose service name.
+  default: '<< {''bambuddy'': ''bambuddy'', ''changedetection'': ''changedetection'', ''cloudflared-web'': ''cloudflared-web'', ''karakeep'': ''karakeep'', ''nginxproxymanager'': ''nginxproxymanager'', ''spoolman'': ''spoolman'', ''tinyauth'': ''tinyauth''}.get(template, '''') >>'
+  placeholder: '<< {''bambuddy'': ''bambuddy'', ''changedetection'': ''changedetection'', ''cloudflared-web'': ''cloudflared-web'', ''karakeep'': ''karakeep'', ''nginxproxymanager'': ''nginxproxymanager'', ''spoolman'': ''spoolman'', ''tinyauth'': ''tinyauth''}.get(template, '''') >>'
+
 container_name:
   type: str
   help: Leave empty to let Docker Compose generate the container name.
-  default: '<< {''bambuddy'': ''bambuddy'', ''cloudflared-web'': ''cloudflared-web'', ''infisical'': ''''}.get(template, '''') >>'
-  placeholder: '<< {''bambuddy'': ''bambuddy'', ''cloudflared-web'': ''cloudflared-web'', ''infisical'': ''infisical''}.get(template, '''') >>'
-  when: << (template == 'bambuddy') or (template == 'cloudflared-web') or (template == 'infisical') >>
-container_timezone:
-  type: str
-  help: Container Timezone
-  default: Europe/Zurich
-  placeholder: Europe/Zurich
-  when: << (template == 'bambuddy') or (template == 'changedetection') or (template == 'nginxproxymanager') or (template == 'spoolman') >>
-puid:
-  type: int
-  help: UID used for files written to persistent storage.
-  default: 1000
-  when: << (template == 'bambuddy') or (template == 'spoolman') >>
-pgid:
-  type: int
-  help: GID used for files written to persistent storage.
-  default: 1000
-  when: << (template == 'bambuddy') or (template == 'spoolman') >>
-restart_policy:
-  type: str
-  help: Restart Policy
-  default: unless-stopped
-  choices:
-  - unless-stopped
-  - always
-  - on-failure
-  - 'no'
-log_level:
-  type: str
-  help: Log Level
-  default: '<< {''bambuddy'': ''INFO'', ''karakeep'': ''info''}.get(template, '''') >>'
-  choices: '<< {''bambuddy'': [''DEBUG'', ''INFO'', ''WARNING'', ''ERROR''], ''karakeep'': [''debug'', ''info'', ''notice'', ''warning'', ''error'']}.get(template, []) >>'
-  when: << (template == 'bambuddy') or (template == 'karakeep') >>
-network_mode:
-  type: str
-  help: Host mode enables automatic LAN printer discovery on Linux. Bridge mode is required on Docker Desktop and usually requires adding printers manually by IP.
-  default: host
-  choices:
-  - host
-  - bridge
-  when: << (template == 'bambuddy') >>
-traefik_enabled:
-  type: bool
-  help: Attach to an external Traefik network and create routing labels.
-  default: '<< {''changedetection'': False, ''infisical'': True, ''karakeep'': False, ''nginxproxymanager'': False, ''spoolman'': False, ''tinyauth'': False}.get(template, False) >>'
-  when: << (template == 'changedetection') or (template == 'infisical') or (template == 'karakeep') or (template == 'nginxproxymanager') or (template == 'spoolman') or (template == 'tinyauth') >>
-npm_proxy_enabled:
-  type: bool
-  help: >-
-    << 'Attach Nginx Proxy Manager to the existing external npm-proxy network so it can reach proxied containers.'
-       if template == 'nginxproxymanager'
-       else 'Attach this container to the existing external npm-proxy network and suppress only its Web UI host port.' >>
-  default: false
-  when: << (template == 'bambuddy' and network_mode == 'bridge') or (template == 'changedetection') or (template == 'infisical') or (template == 'karakeep') or (template == 'nginxproxymanager') or (template == 'spoolman') or (template == 'tinyauth') >>
-ports_http:
-  type: str
-  help: Host port exposed when Traefik and Nginx Proxy Manager integrations are disabled.
-  default: '<< {''changedetection'': ''5000'', ''infisical'': ''8080'', ''karakeep'': ''3000'', ''nginxproxymanager'': ''80'', ''spoolman'': ''7912'', ''tinyauth'': ''3000''}.get(template, '''') >>'
-  placeholder: '<< {''changedetection'': ''5000'', ''infisical'': ''8080'', ''karakeep'': ''3000'', ''nginxproxymanager'': ''80'', ''spoolman'': ''7912'', ''tinyauth'': ''3000''}.get(template, '''') >>'
-  when: << (template == 'changedetection' and not traefik_enabled and not npm_proxy_enabled) or (template == 'infisical' and not traefik_enabled and not npm_proxy_enabled) or (template == 'karakeep' and not traefik_enabled and not npm_proxy_enabled) or (template == 'nginxproxymanager') or (template == 'spoolman' and not traefik_enabled and not npm_proxy_enabled) or (template == 'tinyauth' and not traefik_enabled and not npm_proxy_enabled) >>
-traefik_host:
-  type: str
-  help: Host
-  default: '<< {''changedetection'': ''changedetection'', ''infisical'': ''infisical'', ''karakeep'': ''karakeep'', ''nginxproxymanager'': ''npm'', ''spoolman'': ''spoolman'', ''tinyauth'': ''auth''}.get(template, '''') >>'
-  placeholder: '<< {''changedetection'': ''changedetection'', ''infisical'': ''infisical'', ''karakeep'': ''karakeep'', ''nginxproxymanager'': ''npm'', ''spoolman'': ''spoolman'', ''tinyauth'': ''auth''}.get(template, '''') >>'
-  when: << (template == 'changedetection' and traefik_enabled) or (template == 'infisical' and traefik_enabled) or (template == 'karakeep' and traefik_enabled) or (template == 'nginxproxymanager' and traefik_enabled) or (template == 'spoolman' and traefik_enabled) or (template == 'tinyauth' and traefik_enabled) >>
-traefik_domain:
-  type: str
-  help: Domain
-  default: home.arpa
-  placeholder: home.arpa
-  when: << (template == 'changedetection' and traefik_enabled) or (template == 'infisical' and traefik_enabled) or (template == 'karakeep' and traefik_enabled) or (template == 'nginxproxymanager' and traefik_enabled) or (template == 'spoolman' and traefik_enabled) or (template == 'tinyauth' and traefik_enabled) >>
-traefik_entrypoint:
-  type: str
-  help: Entrypoint
-  default: web
-  placeholder: web
-  when: << (template == 'changedetection' and traefik_enabled) or (template == 'infisical' and traefik_enabled) or (template == 'karakeep' and traefik_enabled) or (template == 'nginxproxymanager' and traefik_enabled) or (template == 'spoolman' and traefik_enabled) or (template == 'tinyauth' and traefik_enabled) >>
-traefik_network:
-  type: str
-  help: Network
-  default: traefik
-  placeholder: traefik
-  when: << (template == 'changedetection' and traefik_enabled) or (template == 'infisical' and traefik_enabled) or (template == 'karakeep' and traefik_enabled) or (template == 'nginxproxymanager' and traefik_enabled) or (template == 'spoolman' and traefik_enabled) or (template == 'tinyauth' and traefik_enabled) >>
-traefik_tls_enabled:
-  type: bool
-  help: TLS
-  default: '<< {''changedetection'': False, ''infisical'': True, ''karakeep'': False, ''nginxproxymanager'': False, ''spoolman'': False, ''tinyauth'': False}.get(template, False) >>'
-  when: << (template == 'changedetection' and traefik_enabled) or (template == 'infisical' and traefik_enabled) or (template == 'karakeep' and traefik_enabled) or (template == 'nginxproxymanager' and traefik_enabled) or (template == 'spoolman' and traefik_enabled) or (template == 'tinyauth' and traefik_enabled) >>
-traefik_tls_entrypoint:
-  type: str
-  help: TLS Entrypoint
-  default: websecure
-  placeholder: websecure
-  when: << (template == 'changedetection' and traefik_enabled and traefik_tls_enabled) or (template == 'infisical' and traefik_enabled and traefik_tls_enabled) or (template == 'karakeep' and traefik_enabled and traefik_tls_enabled) or (template == 'nginxproxymanager' and traefik_enabled and traefik_tls_enabled) or (template == 'spoolman' and traefik_enabled and traefik_tls_enabled) or (template == 'tinyauth' and traefik_enabled and traefik_tls_enabled) >>
-traefik_tls_certresolver:
-  type: str
-  help: Cert Resolver
-  default: cloudflare
-  placeholder: cloudflare
-  when: << (template == 'changedetection' and traefik_enabled and traefik_tls_enabled) or (template == 'infisical' and traefik_enabled and traefik_tls_enabled) or (template == 'karakeep' and traefik_enabled and traefik_tls_enabled) or (template == 'nginxproxymanager' and traefik_enabled and traefik_tls_enabled) or (template == 'spoolman' and traefik_enabled and traefik_tls_enabled) or (template == 'tinyauth' and traefik_enabled and traefik_tls_enabled) >>
-metrics_enabled:
-  type: bool
-  help: Tunnel Metrics
-  default: false
-  when: << (template == 'cloudflared-web') or (template == 'spoolman') >>
+  default: '<< {''bambuddy'': ''bambuddy'', ''cloudflared-web'': ''cloudflared-web''}.get(template, '''') >>'
+  placeholder: '<< {''bambuddy'': ''bambuddy'', ''cloudflared-web'': ''cloudflared-web''}.get(template, '''') >>'
+  when: << template in ['bambuddy', 'cloudflared-web'] >>
+
 volume_mode:
   type: str
   help: Choose where this stack keeps persistent data.
   default: mount
   choices:
     Docker-managed named volumes: local
-    Host bind mounts: mount
+    Host bind mounts under ../data: mount
     NFS-backed named volumes: nfs
+
 volume_mount_path:
   type: str
   help: Host directory for this stack. Multi-volume stacks create subdirectories below it.
   default: '../data/<< container_name or service_name or template >>'
   placeholder: '../data/<< container_name or service_name or template >>'
-  when: << (template == 'bambuddy' and volume_mode == 'mount') or (template == 'changedetection' and volume_mode == 'mount') or (template == 'cloudflared-web' and volume_mode == 'mount') or (template == 'infisical' and volume_mode == 'mount') or (template == 'karakeep' and volume_mode == 'mount') or (template == 'nginxproxymanager' and volume_mode == 'mount') or (template == 'spoolman' and volume_mode == 'mount') or (template == 'tinyauth' and volume_mode == 'mount') >>
+  when: << volume_mode == 'mount' >>
+
 volume_nfs_server:
   type: str
   help: NFS server hostname or IP address.
   default: NFS_SERVER
   placeholder: NFS_SERVER
-  when: << (template == 'bambuddy' and volume_mode == 'nfs') or (template == 'changedetection' and volume_mode == 'nfs') or (template == 'cloudflared-web' and volume_mode == 'nfs') or (template == 'infisical' and volume_mode == 'nfs') or (template == 'karakeep' and volume_mode == 'nfs') or (template == 'nginxproxymanager' and volume_mode == 'nfs') or (template == 'spoolman' and volume_mode == 'nfs') or (template == 'tinyauth' and volume_mode == 'nfs') >>
+  when: << volume_mode == 'nfs' >>
+
 volume_nfs_path:
   type: str
   help: Root NFS export path for this stack. Multi-volume stacks use subdirectories below it.
-  default: '<< {''bambuddy'': ''/export/bambuddy'', ''changedetection'': ''/export/changedetection'', ''cloudflared-web'': ''/export/cloudflared-web'', ''infisical'': ''/export/infisical'', ''karakeep'': ''/export/karakeep'', ''nginxproxymanager'': ''/export/nginxproxymanager'', ''spoolman'': ''/export/spoolman'', ''tinyauth'': ''/export/tinyauth''}.get(template, '''') >>'
-  placeholder: '<< {''bambuddy'': ''/export/bambuddy'', ''changedetection'': ''/export/changedetection'', ''cloudflared-web'': ''/export/cloudflared-web'', ''infisical'': ''/export/infisical'', ''karakeep'': ''/export/karakeep'', ''nginxproxymanager'': ''/export/nginxproxymanager'', ''spoolman'': ''/export/spoolman'', ''tinyauth'': ''/export/tinyauth''}.get(template, '''') >>'
-  when: << (template == 'bambuddy' and volume_mode == 'nfs') or (template == 'changedetection' and volume_mode == 'nfs') or (template == 'cloudflared-web' and volume_mode == 'nfs') or (template == 'infisical' and volume_mode == 'nfs') or (template == 'karakeep' and volume_mode == 'nfs') or (template == 'nginxproxymanager' and volume_mode == 'nfs') or (template == 'spoolman' and volume_mode == 'nfs') or (template == 'tinyauth' and volume_mode == 'nfs') >>
+  default: '/export/<< container_name or service_name or template >>'
+  placeholder: '/export/<< container_name or service_name or template >>'
+  when: << volume_mode == 'nfs' >>
+
 volume_nfs_options:
   type: str
   help: Additional comma-separated NFS mount options.
   default: rw,nolock,soft
   placeholder: rw,nolock,soft
-  when: << (template == 'bambuddy' and volume_mode == 'nfs') or (template == 'changedetection' and volume_mode == 'nfs') or (template == 'cloudflared-web' and volume_mode == 'nfs') or (template == 'infisical' and volume_mode == 'nfs') or (template == 'karakeep' and volume_mode == 'nfs') or (template == 'nginxproxymanager' and volume_mode == 'nfs') or (template == 'spoolman' and volume_mode == 'nfs') or (template == 'tinyauth' and volume_mode == 'nfs') >>
-database_external:
-  type: bool
-  help: External PostgreSQL
-  default: false
-  when: << (template == 'infisical') >>
-database_type:
+  when: << volume_mode == 'nfs' >>
+
+network_mode:
   type: str
-  help: Database Type
-  default: sqlite
+  help: Host mode enables automatic LAN printer discovery on Linux. Bridge mode is required on Docker Desktop and for NPM proxying.
+  default: host
   choices:
-  - sqlite
-  - postgresql
-  - mysql
-  - cockroachdb
-  when: << (template == 'spoolman') >>
-database_password:
-  type: str
-  help: Database Password
-  default: ''
-  when: << (template == 'spoolman' and database_type != 'sqlite') >>
-  secret: true
-database_name:
-  type: str
-  help: Database Name
-  default: '<< {''infisical'': ''infisical'', ''spoolman'': ''spoolman''}.get(template, '''') >>'
-  placeholder: '<< {''infisical'': ''infisical'', ''spoolman'': ''spoolman''}.get(template, '''') >>'
-  when: << (template == 'infisical' and not database_external) or (template == 'spoolman' and database_type != 'sqlite') >>
+    Host networking with automatic discovery: host
+    Bridge networking with explicit ports: bridge
+  when: << template == 'bambuddy' >>
+
 ---
 !include boilerplates/bambuddy/questions.yml
 ---
 !include boilerplates/changedetection/questions.yml
 ---
 !include boilerplates/cloudflared-web/questions.yml
----
-!include boilerplates/infisical/questions.yml
 ---
 !include boilerplates/karakeep/questions.yml
 ---
@@ -264,3 +141,189 @@ database_name:
 !include boilerplates/spoolman/questions.yml
 ---
 !include boilerplates/tinyauth/questions.yml
+---
+configure_optional:
+  type: bool
+  help: 'Configure optional << {''bambuddy'': ''BamBuddy'', ''changedetection'': ''changedetection.io'', ''cloudflared-web'': ''Cloudflared Web'', ''karakeep'': ''Karakeep'', ''nginxproxymanager'': ''Nginx Proxy Manager'', ''spoolman'': ''Spoolman'', ''tinyauth'': ''TinyAuth''}[template] >> settings?'
+  default: false
+
+optional_groups:
+  type: str
+  help: Select every optional configuration group you want to review.
+  multiselect: true
+  default: []
+  choices: |
+    <% if template == 'bambuddy' %>
+    Runtime and networking: runtime
+    <% if network_mode == 'bridge' %>
+    Nginx Proxy Manager: npm_proxy
+    <% endif %>
+    Home Assistant: home_assistant
+    External PostgreSQL: database
+    OrcaSlicer API: slicer
+    External libraries: libraries
+    Certificates and backups: certificates_backups
+    <% elif template == 'changedetection' %>
+    Nginx Proxy Manager: npm_proxy
+    Public URL and privacy: public_privacy
+    JavaScript browser: browser
+    Outbound proxy: outbound_proxy
+    Fetch tuning: fetch
+    <% elif template == 'cloudflared-web' %>
+    Web UI authentication: webui_auth
+    Tunnel connection: tunnel
+    Metrics: metrics
+    <% elif template == 'karakeep' %>
+    Nginx Proxy Manager: npm_proxy
+    Access and crawling: crawler
+    Artificial intelligence: ai
+    OpenID Connect: oidc
+    Email: email
+    S3-compatible storage: s3
+    Database and storage tuning: storage_tuning
+    <% elif template == 'nginxproxymanager' %>
+    Proxy network attachment: npm_proxy
+    External database: database
+    Initial administrator: initial_admin
+    Network and embedding: network_behavior
+    Custom Nginx configuration: custom_config
+    <% elif template == 'spoolman' %>
+    Nginx Proxy Manager: npm_proxy
+    External database: database
+    Access controls: access
+    Logging and metrics: observability
+    Material catalog: catalog
+    SQLite backups: backups
+    <% elif template == 'tinyauth' %>
+    Nginx Proxy Manager: npm_proxy
+    Session and access policy: session_access
+    OAuth tuning: oauth
+    LDAP tuning: ldap
+    User interface: ui
+    Privacy and logging: privacy_logging
+    <% endif %>
+  when: << configure_optional >>
+
+npm_proxy_enabled:
+  type: bool
+  default: "<< 'npm_proxy' in optional_groups >>"
+  when: false
+
+npm_proxy_network:
+  type: str
+  help: Existing external Docker network shared by Nginx Proxy Manager and proxied applications.
+  default: npm-proxy
+  placeholder: npm-proxy
+  when: << npm_proxy_enabled >>
+
+restart_policy:
+  type: str
+  help: Docker restart policy.
+  default: unless-stopped
+  choices:
+    - unless-stopped
+    - always
+    - on-failure
+    - 'no'
+  when: >-
+    << configure_optional and (
+      (template == 'bambuddy' and 'runtime' in optional_groups) or
+      (template == 'cloudflared-web' and 'tunnel' in optional_groups) or
+      (template == 'nginxproxymanager' and 'network_behavior' in optional_groups) or
+      (template == 'spoolman' and 'observability' in optional_groups)
+    ) >>
+
+container_timezone:
+  type: str
+  help: IANA timezone used inside the container.
+  default: Europe/Zurich
+  placeholder: Europe/Zurich
+  when: >-
+    << configure_optional and (
+      (template == 'bambuddy' and 'runtime' in optional_groups) or
+      (template == 'changedetection' and 'public_privacy' in optional_groups) or
+      (template == 'nginxproxymanager' and 'network_behavior' in optional_groups) or
+      (template == 'spoolman' and 'observability' in optional_groups)
+    ) >>
+
+puid:
+  type: int
+  help: UID used for files written to persistent storage.
+  default: 1000
+  when: << configure_optional and ((template == 'bambuddy' and 'runtime' in optional_groups) or (template == 'spoolman' and 'observability' in optional_groups)) >>
+
+pgid:
+  type: int
+  help: GID used for files written to persistent storage.
+  default: 1000
+  when: << configure_optional and ((template == 'bambuddy' and 'runtime' in optional_groups) or (template == 'spoolman' and 'observability' in optional_groups)) >>
+
+log_level:
+  type: str
+  help: Application log level.
+  default: '<< {''bambuddy'': ''INFO'', ''karakeep'': ''info'', ''tinyauth'': ''info''}.get(template, ''info'') >>'
+  choices: '<< {''bambuddy'': [''DEBUG'', ''INFO'', ''WARNING'', ''ERROR''], ''karakeep'': [''debug'', ''info'', ''notice'', ''warning'', ''error''], ''tinyauth'': [''debug'', ''info'', ''warn'', ''error'']}.get(template, []) >>'
+  when: >-
+    << configure_optional and (
+      (template == 'bambuddy' and 'runtime' in optional_groups) or
+      (template == 'karakeep' and 'crawler' in optional_groups) or
+      (template == 'tinyauth' and 'privacy_logging' in optional_groups)
+    ) >>
+
+metrics_enabled:
+  type: bool
+  help: Expose application metrics.
+  default: false
+  when: << configure_optional and ((template == 'cloudflared-web' and 'metrics' in optional_groups) or (template == 'spoolman' and 'observability' in optional_groups)) >>
+
+email_enabled:
+  type: bool
+  help: Configure SMTP email delivery.
+  default: false
+  when: << template == 'karakeep' and configure_optional and 'email' in optional_groups >>
+
+database_type:
+  type: str
+  help: Database engine.
+  default: sqlite
+  choices:
+    SQLite: sqlite
+    PostgreSQL: postgres
+    MySQL: mysql
+    CockroachDB: cockroachdb
+  when: << template == 'spoolman' and configure_optional and 'database' in optional_groups >>
+
+database_name:
+  type: str
+  help: Application database name.
+  default: spoolman
+  when: << template == 'spoolman' and configure_optional and 'database' in optional_groups and database_type != 'sqlite' >>
+
+ports_http:
+  type: str
+  help: Direct host port for the Web UI when Nginx Proxy Manager integration is not selected.
+  default: '<< {''changedetection'': ''5000'', ''karakeep'': ''3000'', ''nginxproxymanager'': ''80'', ''spoolman'': ''7912'', ''tinyauth'': ''3000''}.get(template, '''') >>'
+  placeholder: '<< {''changedetection'': ''5000'', ''karakeep'': ''3000'', ''nginxproxymanager'': ''80'', ''spoolman'': ''7912'', ''tinyauth'': ''3000''}.get(template, '''') >>'
+  when: >-
+    << not npm_proxy_enabled and configure_optional and (
+      (template == 'changedetection' and 'public_privacy' in optional_groups) or
+      (template == 'karakeep' and 'crawler' in optional_groups) or
+      (template == 'nginxproxymanager' and 'network_behavior' in optional_groups) or
+      (template == 'spoolman' and 'access' in optional_groups) or
+      (template == 'tinyauth' and 'session_access' in optional_groups)
+    ) >>
+
+---
+!include boilerplates/bambuddy/options.yml
+---
+!include boilerplates/changedetection/options.yml
+---
+!include boilerplates/cloudflared-web/options.yml
+---
+!include boilerplates/karakeep/options.yml
+---
+!include boilerplates/nginxproxymanager/options.yml
+---
+!include boilerplates/spoolman/options.yml
+---
+!include boilerplates/tinyauth/options.yml

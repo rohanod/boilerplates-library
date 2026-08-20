@@ -17,45 +17,25 @@ services:
       <%- endif %>
     networks:
       << service_name >>_backend:
-      <%- if traefik_enabled %>
-      << traefik_network >>:
-      <%- endif %>
       <%- if npm_proxy_enabled %>
       npm-proxy:
         aliases:
           - karakeep-web
       <%- endif %>
-    <%- if not traefik_enabled and not npm_proxy_enabled %>
+    <%- if not npm_proxy_enabled %>
     ports:
       - "<< ports_http >>:3000"
     <%- endif %>
-    <%- if traefik_enabled %>
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=<< traefik_network >>
-      - traefik.http.services.<< service_name >>-web.loadBalancer.server.port=3000
-      - traefik.http.routers.<< service_name >>-http.service=<< service_name >>-web
-      - traefik.http.routers.<< service_name >>-http.rule=Host(`<< traefik_host >>.<< traefik_domain >>`)
-      - traefik.http.routers.<< service_name >>-http.entrypoints=<< traefik_entrypoint >>
-      <%- if traefik_tls_enabled %>
-      - traefik.http.routers.<< service_name >>-https.service=<< service_name >>-web
-      - traefik.http.routers.<< service_name >>-https.rule=Host(`<< traefik_host >>.<< traefik_domain >>`)
-      - traefik.http.routers.<< service_name >>-https.entrypoints=<< traefik_tls_entrypoint >>
-      - traefik.http.routers.<< service_name >>-https.tls=true
-      - traefik.http.routers.<< service_name >>-https.tls.certresolver=<< traefik_tls_certresolver >>
-      <%- endif %>
-    <%- endif %>
 
   << service_name >>_chrome:
-    image: gcr.io/zenika-hub/alpine-chrome:124
+    image: ghcr.io/karakeep-app/karakeep-chrome:release
     restart: << restart_policy >>
     command:
-      - --no-sandbox
       - --disable-gpu
       - --disable-dev-shm-usage
-      - --remote-debugging-address=0.0.0.0
-      - --remote-debugging-port=9222
       - --hide-scrollbars
+      - --disable-blink-features=AutomationControlled
+      - --window-size=1440,900
     networks:
       - << service_name >>_backend
 
@@ -78,12 +58,9 @@ services:
 networks:
   << service_name >>_backend:
     driver: bridge
-  <%- if traefik_enabled %>
-  << traefik_network >>:
-    external: true
-  <%- endif %>
   <%- if npm_proxy_enabled %>
   npm-proxy:
+    name: << npm_proxy_network >>
     external: true
   <%- endif %>
 

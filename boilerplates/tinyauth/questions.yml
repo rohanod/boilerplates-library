@@ -1,24 +1,107 @@
 app_url:
   type: str
-  help: Public URL used by TinyAuth for redirects and cookies. Use the Traefik URL when reverse-proxied.
+  help: Public URL TinyAuth uses for redirects and cookies.
   default: http://localhost:3000
-  placeholder: https://auth.home.arpa
+  placeholder: https://auth.example.com
   when: << template == 'tinyauth' >>
+  validator: <% if not app_url | trim %>Application URL is required.<% endif %>
+
+auth_sources:
+  type: str
+  help: Select at least one authentication source TinyAuth can use.
+  multiselect: true
+  default:
+    - local
+  choices:
+    Local users: local
+    OAuth provider: oauth
+    LDAP directory: ldap
+  when: << template == 'tinyauth' >>
+  validator: <% if not auth_sources %>Select at least one authentication source.<% endif %>
+
 auth_users:
   type: str
-  help: Comma-separated username:bcrypt-hash entries. Generate a bcrypt hash with TinyAuth's password utility or bcrypt tooling.
+  help: Comma-separated username:bcrypt-hash entries. Generate hashes with TinyAuth's password utility.
   default: ''
   placeholder: admin:$2a$10$...
   secret: true
-  when: << template == 'tinyauth' >>
-trusted_proxies:
+  when: << template == 'tinyauth' and 'local' in auth_sources >>
+  validator: <% if not auth_users | trim %>At least one local user is required.<% endif %>
+
+oauth_provider_name:
   type: str
-  help: Comma-separated proxy IPs or CIDRs allowed to provide forwarded client headers.
-  default: 172.17.0.0/16
-  placeholder: 172.17.0.0/16
-  when: << template == 'tinyauth' >>
-secure_cookie:
-  type: bool
-  help: Set secure cookies; keep enabled when TinyAuth is served over HTTPS.
-  default: true
-  when: << template == 'tinyauth' >>
+  help: Short identifier used in TinyAuth OAuth environment variable names.
+  default: generic
+  placeholder: generic
+  when: << template == 'tinyauth' and 'oauth' in auth_sources >>
+
+oauth_client_id:
+  type: str
+  help: OAuth client ID.
+  default: ''
+  when: << template == 'tinyauth' and 'oauth' in auth_sources >>
+  validator: <% if not oauth_client_id | trim %>OAuth client ID is required.<% endif %>
+
+oauth_client_secret:
+  type: str
+  help: OAuth client secret.
+  default: ''
+  secret: true
+  when: << template == 'tinyauth' and 'oauth' in auth_sources >>
+  validator: <% if not oauth_client_secret | trim %>OAuth client secret is required.<% endif %>
+
+oauth_auth_url:
+  type: str
+  help: OAuth authorization endpoint.
+  default: ''
+  placeholder: https://provider.example.com/oauth/authorize
+  when: << template == 'tinyauth' and 'oauth' in auth_sources >>
+  validator: <% if not oauth_auth_url | trim %>OAuth authorization URL is required.<% endif %>
+
+oauth_token_url:
+  type: str
+  help: OAuth token endpoint.
+  default: ''
+  placeholder: https://provider.example.com/oauth/token
+  when: << template == 'tinyauth' and 'oauth' in auth_sources >>
+  validator: <% if not oauth_token_url | trim %>OAuth token URL is required.<% endif %>
+
+oauth_user_info_url:
+  type: str
+  help: OAuth user-info endpoint.
+  default: ''
+  placeholder: https://provider.example.com/oauth/userinfo
+  when: << template == 'tinyauth' and 'oauth' in auth_sources >>
+  validator: <% if not oauth_user_info_url | trim %>OAuth user-info URL is required.<% endif %>
+
+ldap_address:
+  type: str
+  help: LDAP server address including scheme and port.
+  default: ''
+  placeholder: ldaps://ldap.example.com:636
+  when: << template == 'tinyauth' and 'ldap' in auth_sources >>
+  validator: <% if not ldap_address | trim %>LDAP address is required.<% endif %>
+
+ldap_bind_dn:
+  type: str
+  help: Distinguished name used to search LDAP.
+  default: ''
+  placeholder: cn=tinyauth,ou=services,dc=example,dc=com
+  when: << template == 'tinyauth' and 'ldap' in auth_sources >>
+  validator: <% if not ldap_bind_dn | trim %>LDAP bind DN is required.<% endif %>
+
+ldap_bind_password:
+  type: str
+  help: LDAP bind password.
+  default: ''
+  secret: true
+  when: << template == 'tinyauth' and 'ldap' in auth_sources >>
+  validator: <% if not ldap_bind_password | trim %>LDAP bind password is required.<% endif %>
+
+ldap_base_dn:
+  type: str
+  help: Base DN searched for users.
+  default: ''
+  placeholder: ou=people,dc=example,dc=com
+  when: << template == 'tinyauth' and 'ldap' in auth_sources >>
+  validator: <% if not ldap_base_dn | trim %>LDAP base DN is required.<% endif %>

@@ -1,0 +1,287 @@
+disable_signups:
+  type: bool
+  help: Disable account creation after provisioning desired users.
+  default: false
+  when: << template == 'karakeep' and configure_optional and 'crawler' in optional_groups >>
+
+rate_limiting_enabled:
+  type: bool
+  help: Enable API rate limiting.
+  default: true
+  when: << template == 'karakeep' and configure_optional and 'crawler' in optional_groups >>
+
+crawler_num_workers:
+  type: int
+  help: Concurrent crawling jobs.
+  default: 1
+  when: << template == 'karakeep' and configure_optional and 'crawler' in optional_groups >>
+
+crawler_download_banner_image:
+  type: bool
+  help: Store page banner images.
+  default: true
+  when: << template == 'karakeep' and configure_optional and 'crawler' in optional_groups >>
+
+crawler_store_screenshot:
+  type: bool
+  help: Store screenshots.
+  default: true
+  when: << template == 'karakeep' and configure_optional and 'crawler' in optional_groups >>
+
+crawler_full_page_screenshot:
+  type: bool
+  help: Store full-page screenshots.
+  default: false
+  when: << template == 'karakeep' and configure_optional and 'crawler' in optional_groups >>
+
+crawler_store_pdf:
+  type: bool
+  help: Store PDF archives.
+  default: false
+  when: << template == 'karakeep' and configure_optional and 'crawler' in optional_groups >>
+
+crawler_full_page_archive:
+  type: bool
+  help: Store a complete local page copy.
+  default: false
+  when: << template == 'karakeep' and configure_optional and 'crawler' in optional_groups >>
+
+crawler_http_proxy:
+  type: str
+  help: Optional HTTP crawler proxy; credentials are omitted from Copier answers.
+  default: ''
+  secret: true
+  when: << template == 'karakeep' and configure_optional and 'crawler' in optional_groups >>
+
+crawler_https_proxy:
+  type: str
+  help: Optional HTTPS crawler proxy; credentials are omitted from Copier answers.
+  default: ''
+  secret: true
+  when: << template == 'karakeep' and configure_optional and 'crawler' in optional_groups >>
+
+crawler_no_proxy:
+  type: str
+  help: Comma-separated crawler proxy bypass list.
+  default: ''
+  when: << template == 'karakeep' and configure_optional and 'crawler' in optional_groups >>
+
+crawler_allowed_internal_hostnames:
+  type: str
+  help: Comma-separated private hostnames the crawler may access.
+  default: ''
+  when: << template == 'karakeep' and configure_optional and 'crawler' in optional_groups >>
+
+ai_provider:
+  type: str
+  help: AI provider.
+  default: none
+  choices:
+    - none
+    - openai
+    - ollama
+  when: << template == 'karakeep' and configure_optional and 'ai' in optional_groups >>
+
+openai_api_key:
+  type: str
+  help: OpenAI-compatible API key.
+  default: ''
+  secret: true
+  when: << template == 'karakeep' and ai_provider == 'openai' >>
+  validator: <% if not openai_api_key | trim %>API key is required.<% endif %>
+
+openai_base_url:
+  type: str
+  help: Optional OpenAI-compatible API base URL.
+  default: ''
+  placeholder: https://api.openai.com/v1
+  when: << template == 'karakeep' and ai_provider == 'openai' >>
+
+ollama_base_url:
+  type: str
+  help: Ollama base URL.
+  default: http://host.docker.internal:11434
+  when: << template == 'karakeep' and ai_provider == 'ollama' >>
+
+ollama_keep_alive:
+  type: str
+  help: Optional Ollama model keep-alive duration.
+  default: ''
+  placeholder: 5m
+  when: << template == 'karakeep' and ai_provider == 'ollama' >>
+
+inference_text_model:
+  type: str
+  help: Text inference model.
+  default: gpt-4.1-mini
+  when: << template == 'karakeep' and ai_provider in ['openai', 'ollama'] >>
+
+inference_image_model:
+  type: str
+  help: Image inference model.
+  default: gpt-4o-mini
+  when: << template == 'karakeep' and ai_provider in ['openai', 'ollama'] >>
+
+inference_language:
+  type: str
+  help: Inference language.
+  default: english
+  when: << template == 'karakeep' and ai_provider in ['openai', 'ollama'] >>
+
+inference_auto_summarization:
+  type: bool
+  help: Automatically summarize archived content.
+  default: false
+  when: << template == 'karakeep' and ai_provider in ['openai', 'ollama'] >>
+
+oidc_enabled:
+  type: bool
+  help: Enable OpenID Connect login.
+  default: false
+  when: << template == 'karakeep' and configure_optional and 'oidc' in optional_groups >>
+
+oidc_wellknown_url:
+  type: str
+  help: OIDC discovery URL.
+  default: ''
+  placeholder: https://id.example.com/.well-known/openid-configuration
+  when: << template == 'karakeep' and oidc_enabled >>
+  validator: <% if not oidc_wellknown_url | trim %>OIDC discovery URL is required.<% endif %>
+
+oidc_client_id:
+  type: str
+  help: OIDC client ID.
+  default: ''
+  when: << template == 'karakeep' and oidc_enabled >>
+  validator: <% if not oidc_client_id | trim %>OIDC client ID is required.<% endif %>
+
+oidc_client_secret:
+  type: str
+  help: OIDC client secret.
+  default: ''
+  secret: true
+  when: << template == 'karakeep' and oidc_enabled >>
+  validator: <% if not oidc_client_secret | trim %>OIDC client secret is required.<% endif %>
+
+oidc_scope:
+  type: str
+  help: OIDC scopes.
+  default: openid email profile
+  when: << template == 'karakeep' and oidc_enabled >>
+
+oidc_provider_name:
+  type: str
+  help: Login button label.
+  default: Custom Provider
+  when: << template == 'karakeep' and oidc_enabled >>
+
+oidc_auto_redirect:
+  type: bool
+  help: Redirect directly to the OIDC provider.
+  default: false
+  when: << template == 'karakeep' and oidc_enabled >>
+
+oidc_timeout:
+  type: int
+  help: OIDC request timeout in milliseconds.
+  default: 3500
+  when: << template == 'karakeep' and oidc_enabled >>
+
+email_verification_required:
+  type: bool
+  help: Require users to verify email addresses.
+  default: false
+  when: << template == 'karakeep' and email_enabled >>
+
+smtp_host:
+  type: str
+  help: SMTP host.
+  default: ''
+  when: << template == 'karakeep' and email_enabled >>
+  validator: <% if not smtp_host | trim %>SMTP host is required.<% endif %>
+
+smtp_port:
+  type: int
+  help: SMTP port.
+  default: 587
+  when: << template == 'karakeep' and email_enabled >>
+
+smtp_secure:
+  type: bool
+  help: Use implicit TLS for SMTP.
+  default: false
+  when: << template == 'karakeep' and email_enabled >>
+
+smtp_user:
+  type: str
+  help: SMTP username.
+  default: ''
+  when: << template == 'karakeep' and email_enabled >>
+
+smtp_password:
+  type: str
+  help: SMTP password.
+  default: ''
+  secret: true
+  when: << template == 'karakeep' and email_enabled >>
+
+smtp_from:
+  type: str
+  help: Sender address.
+  default: ''
+  placeholder: Karakeep <karakeep@example.com>
+  when: << template == 'karakeep' and email_enabled >>
+  validator: <% if not smtp_from | trim %>SMTP sender is required.<% endif %>
+
+s3_enabled:
+  type: bool
+  help: Store assets in an S3-compatible service.
+  default: false
+  when: << template == 'karakeep' and configure_optional and 's3' in optional_groups >>
+
+s3_endpoint:
+  type: str
+  help: S3-compatible endpoint URL.
+  default: ''
+  when: << template == 'karakeep' and s3_enabled >>
+
+s3_region:
+  type: str
+  help: S3 region.
+  default: ''
+  when: << template == 'karakeep' and s3_enabled >>
+
+s3_bucket:
+  type: str
+  help: S3 bucket name.
+  default: ''
+  when: << template == 'karakeep' and s3_enabled >>
+  validator: <% if not s3_bucket | trim %>S3 bucket is required.<% endif %>
+
+s3_access_key_id:
+  type: str
+  help: S3 access key ID.
+  default: ''
+  secret: true
+  when: << template == 'karakeep' and s3_enabled >>
+  validator: <% if not s3_access_key_id | trim %>S3 access key is required.<% endif %>
+
+s3_secret_access_key:
+  type: str
+  help: S3 secret access key.
+  default: ''
+  secret: true
+  when: << template == 'karakeep' and s3_enabled >>
+  validator: <% if not s3_secret_access_key | trim %>S3 secret key is required.<% endif %>
+
+s3_force_path_style:
+  type: bool
+  help: Use path-style S3 URLs.
+  default: false
+  when: << template == 'karakeep' and s3_enabled >>
+
+db_wal_mode:
+  type: bool
+  help: Enable SQLite WAL mode for local storage; avoid it on incompatible network filesystems.
+  default: false
+  when: << template == 'karakeep' and configure_optional and 'storage_tuning' in optional_groups >>

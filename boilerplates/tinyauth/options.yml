@@ -1,0 +1,135 @@
+secure_cookie:
+  type: bool
+  help: Require HTTPS for session cookies.
+  default: true
+  when: << template == 'tinyauth' and configure_optional and 'session_access' in optional_groups >>
+
+trusted_proxies:
+  type: str
+  help: Comma-separated proxy IPs or CIDRs trusted to provide forwarded client headers.
+  default: ''
+  placeholder: 10.0.0.0/8
+  when: << template == 'tinyauth' and configure_optional and 'session_access' in optional_groups >>
+
+subdomains_enabled:
+  type: bool
+  help: Share authentication across application subdomains.
+  default: true
+  when: << template == 'tinyauth' and configure_optional and 'session_access' in optional_groups >>
+
+session_expiry:
+  type: int
+  help: Idle session expiry in seconds.
+  default: 86400
+  when: << template == 'tinyauth' and configure_optional and 'session_access' in optional_groups >>
+
+session_max_lifetime:
+  type: int
+  help: Maximum session lifetime in seconds; 0 disables the maximum.
+  default: 0
+  when: << template == 'tinyauth' and configure_optional and 'session_access' in optional_groups >>
+
+login_timeout:
+  type: int
+  help: Login attempt window in seconds.
+  default: 300
+  when: << template == 'tinyauth' and configure_optional and 'session_access' in optional_groups >>
+
+login_max_retries:
+  type: int
+  help: Maximum failed login attempts within the timeout window.
+  default: 3
+  when: << template == 'tinyauth' and configure_optional and 'session_access' in optional_groups >>
+
+acl_policy:
+  type: str
+  help: Default global access-control policy.
+  default: allow
+  choices:
+    - allow
+    - deny
+  when: << template == 'tinyauth' and configure_optional and 'session_access' in optional_groups >>
+
+ip_allow:
+  type: str
+  help: Comma-separated globally allowed IPs or CIDRs.
+  default: ''
+  when: << template == 'tinyauth' and configure_optional and 'session_access' in optional_groups >>
+
+ip_block:
+  type: str
+  help: Comma-separated globally blocked IPs or CIDRs.
+  default: ''
+  when: << template == 'tinyauth' and configure_optional and 'session_access' in optional_groups >>
+
+ip_bypass:
+  type: str
+  help: Comma-separated IPs or CIDRs that bypass authentication.
+  default: ''
+  when: << template == 'tinyauth' and configure_optional and 'session_access' in optional_groups >>
+
+oauth_whitelist:
+  type: str
+  help: Comma-separated OAuth identities allowed to sign in.
+  default: ''
+  when: << template == 'tinyauth' and 'oauth' in auth_sources and configure_optional and 'oauth' in optional_groups >>
+
+oauth_scopes:
+  type: str
+  help: OAuth scopes.
+  default: openid email profile
+  when: << template == 'tinyauth' and 'oauth' in auth_sources and configure_optional and 'oauth' in optional_groups >>
+
+oauth_redirect_url:
+  type: str
+  help: Optional OAuth redirect URL override.
+  default: ''
+  when: << template == 'tinyauth' and 'oauth' in auth_sources and configure_optional and 'oauth' in optional_groups >>
+
+oauth_insecure:
+  type: bool
+  help: Permit insecure OAuth transport; keep disabled outside isolated development.
+  default: false
+  when: << template == 'tinyauth' and 'oauth' in auth_sources and configure_optional and 'oauth' in optional_groups >>
+
+ldap_search_filter:
+  type: str
+  help: LDAP user search filter.
+  default: (uid=%s)
+  when: << template == 'tinyauth' and 'ldap' in auth_sources and configure_optional and 'ldap' in optional_groups >>
+
+ldap_insecure:
+  type: bool
+  help: Permit insecure LDAP transport; keep disabled when using credentials.
+  default: false
+  when: << template == 'tinyauth' and 'ldap' in auth_sources and configure_optional and 'ldap' in optional_groups >>
+
+ldap_group_cache_ttl:
+  type: int
+  help: LDAP group cache duration in seconds.
+  default: 900
+  when: << template == 'tinyauth' and 'ldap' in auth_sources and configure_optional and 'ldap' in optional_groups >>
+
+ui_title:
+  type: str
+  help: Login page title.
+  default: Tinyauth
+  when: << template == 'tinyauth' and configure_optional and 'ui' in optional_groups >>
+
+ui_forgot_password_message:
+  type: str
+  help: Message shown when users need password help.
+  default: You can change your password by changing the configuration.
+  when: << template == 'tinyauth' and configure_optional and 'ui' in optional_groups >>
+
+analytics_enabled:
+  type: bool
+  help: Send anonymous TinyAuth analytics.
+  default: true
+  when: << template == 'tinyauth' and configure_optional and 'privacy_logging' in optional_groups >>
+
+log_json:
+  type: bool
+  help: Emit JSON-formatted logs.
+  default: false
+  when: << template == 'tinyauth' and configure_optional and 'privacy_logging' in optional_groups >>

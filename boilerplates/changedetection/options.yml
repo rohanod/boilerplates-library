@@ -1,0 +1,93 @@
+base_url:
+  type: str
+  help: Public URL used in notification links.
+  default: http://localhost:5000
+  placeholder: https://changedetection.example.com
+  when: << template == 'changedetection' and configure_optional and 'public_privacy' in optional_groups >>
+
+use_x_settings:
+  type: bool
+  help: Trust reverse-proxy X-Settings headers.
+  default: false
+  when: << template == 'changedetection' and configure_optional and 'public_privacy' in optional_groups >>
+
+hide_referer:
+  type: bool
+  help: Hide the Referer header from monitored sites.
+  default: true
+  when: << template == 'changedetection' and configure_optional and 'public_privacy' in optional_groups >>
+
+browser_mode:
+  type: str
+  help: JavaScript browser used for Playwright-based fetching.
+  default: disabled
+  choices:
+    Disabled: disabled
+    Bundled Sockpuppet Browser sidecar: sidecar
+    Existing external Playwright endpoint: external
+  when: << template == 'changedetection' and configure_optional and 'browser' in optional_groups >>
+
+playwright_driver_url:
+  type: str
+  help: WebSocket URL of an existing Playwright browser.
+  default: ''
+  placeholder: ws://browser.example.com:3000
+  when: << template == 'changedetection' and browser_mode == 'external' >>
+  validator: <% if not playwright_driver_url | trim %>Playwright driver URL is required.<% endif %>
+
+browser_screen_width:
+  type: int
+  help: Sockpuppet browser screen width.
+  default: 1920
+  when: << template == 'changedetection' and browser_mode == 'sidecar' >>
+
+browser_screen_height:
+  type: int
+  help: Sockpuppet browser screen height.
+  default: 1024
+  when: << template == 'changedetection' and browser_mode == 'sidecar' >>
+
+browser_screen_depth:
+  type: int
+  help: Sockpuppet browser color depth.
+  default: 16
+  when: << template == 'changedetection' and browser_mode == 'sidecar' >>
+
+browser_max_concurrency:
+  type: int
+  help: Maximum concurrent browser processes.
+  default: 10
+  when: << template == 'changedetection' and browser_mode == 'sidecar' >>
+
+http_proxy:
+  type: str
+  help: Optional HTTP proxy URL; credentials are omitted from Copier answers.
+  default: ''
+  secret: true
+  when: << template == 'changedetection' and configure_optional and 'outbound_proxy' in optional_groups >>
+
+https_proxy:
+  type: str
+  help: Optional HTTPS proxy URL; credentials are omitted from Copier answers.
+  default: ''
+  secret: true
+  when: << template == 'changedetection' and configure_optional and 'outbound_proxy' in optional_groups >>
+
+no_proxy:
+  type: str
+  help: Comma-separated destinations that bypass outbound proxies.
+  default: ''
+  placeholder: localhost,127.0.0.1,.home.arpa
+  when: << template == 'changedetection' and configure_optional and 'outbound_proxy' in optional_groups >>
+
+fetch_workers:
+  type: int
+  help: Concurrent fetch workers.
+  default: 10
+  when: << template == 'changedetection' and configure_optional and 'fetch' in optional_groups >>
+
+minimum_seconds_recheck_time:
+  type: int
+  help: Minimum allowed recheck interval in seconds; use 0 to disable the override.
+  default: 3
+  when: << template == 'changedetection' and configure_optional and 'fetch' in optional_groups >>
