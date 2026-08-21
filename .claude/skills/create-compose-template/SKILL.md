@@ -93,7 +93,9 @@ copier copy --trust -d template=<name> gh:rohanod/boilerplates-library ./<name>
 
 Pinned image tags in `files/compose.yaml` are the application-version source of truth. Do not recreate per-template version metadata; Renovate updates the image references directly.
 
-Copier versions this repository as a whole, not each stack independently. Release tags must be PEP 440-compatible, such as `v1.0.0`, so generated projects can resolve and record a stable `_commit` in `.copier-answers.yml`. All selectors share that release stream. Do not create or push a repository tag unless the user explicitly asks.
+Copier versions this repository as a whole, not each stack independently. Release tags must be PEP 440-compatible, such as `v1.0.0`, so generated projects can resolve and record a stable `_commit` in `.copier-answers.yml`. All selectors share that release stream.
+
+When the user asks to commit, push, and merge a template behavior change, release it after the merge unless they explicitly say not to: tag the merged `main` commit and push that tag. Use semantic versioning—patch for backward-compatible fixes, minor for backward-compatible features/options, and major for removed templates or other incompatible changes. Do not tag documentation-only changes unless explicitly requested.
 
 When changing an image tag manually, verify it against the application's official release source and run the full template check. An image update alone does not require a Copier migration; reserve `_migrations` for destination transformations that normal Copier updates cannot express.
 
@@ -114,4 +116,4 @@ If a required tool is unavailable, run the remaining checks and state exactly wh
 
 ## 10. Stop at the implementation boundary
 
-Report the upstream and official sources used, pinned image version, files changed, verification performed, and anything skipped. Do not commit or push unless explicitly asked. Never add co-author trailers.
+Report the upstream and official sources used, pinned image version, files changed, verification performed, and anything skipped. Do not commit or push unless explicitly asked. When the user asks to commit, push, and merge a template behavior change, tag and push the merged release as specified in section 8. Never add co-author trailers.
