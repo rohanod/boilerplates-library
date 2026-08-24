@@ -83,11 +83,11 @@ container_name:
 
 volume_mode:
   type: str
-  help: Choose where this stack keeps persistent data.
+  help: Choose where this stack keeps persistent data. ../data is relative to the destination directory you chose, not where you ran Copier.
   default: mount
   choices:
     Docker-managed named volumes: local
-    Host bind mounts under ../data: mount
+    Host bind mounts in ../data from the destination directory: mount
     NFS-backed named volumes: nfs
 
 volume_mount_path:
